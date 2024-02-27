@@ -1,0 +1,73 @@
+Progettazione web app scolastica.
+Creare una web app principalmente Rest che rappresenti un registro elettronico.
+L'obiettivo è di fornire una certa quality of life nell'uso del registro elettronico
+Sono previsti:
+
+Pagina resoconto della classe, con la lista degli studenti e dei docenti divisi per materia.
+
+Pagina personale dello studente in cui controllare voti con relativa materia, docente e data.
+
+Pagina personale dello studente in cui controllare le proprie assenze, controllando se sia un'assenza totale o parziale e il giorno, in più ci sarà la possibilità di fare sorting in base alla data.
+
+Pagina comune alla classe in cui controllare l'orario previsto, con giorno e materia.
+
+Pagina personale del docente in cui può controllare il proprio orario.
+
+Pagina personale del docente in cui può controllare i voti dati ed eventualmente cambiare il voto.
+
+Pagina personale del docente in cui c'è il resoconto delle classi che segue.
+
+Obiettivi short term:
+Imparare a usare Spring Security per inserire un layer di sicurezza, ognuno dovrebbe potrebbe poter accedere solo alle proprie  pagine, impostare il security filter dove un utente può accedere solo alle pagine /personal/{user-id}.
+Gestire i ruoli, ogni Entità che rappresenta una persona dovrebbe avere una relativa entità One to One che rappresenta l’utente, che a sua volta avrà uno dei tre ruoli previsti, ROLE_STUDENT, TEACHER and ADMIN.
+Ogni utente dovrebbe poter usare solo le feature che è autorizzato ad usare.
+Lo studente in genere dovrebbe poter vedere solo un suo resoconto personale ed un summary della classe.
+Il Docente oltre a poter accedere a ciò che lo riguarda, classi seguite, voti assegnati ed orari dovrebbe poter vedere il resoconto delle classi che segue, le assenze generali degli alunni, ovviamente dovrebbe poter assegnare voti e modificarli.
+L’Admin sarà un ruolo molto marginale, dovrebbe poter vedere il quadro generale, ovvero accedere ad ogni pagina, in più dovrebbe poter inserire Docenti e Studenti all’interno del Database.
+Non sarà previsto un sistema di registrazione, ma sarà l’amministrazione a fornire le credenziali di accesso. 
+	
+Obiettivi Long term:
+Gamification della performance scolastica.
+Aggiunta di un’entità Genitore a cui mandare mail di aggiornamento riguardo al proprio assistito.
+
+Entità previste:
+Utente: racchiude le credenziali di accesso, ovvero UUID generato, password assegnata e Ruolo, ogni utente avrà una relazione One to One con le entità che rappresentano una persona fisica.
+
+Studente: Anagrafica annidata per rappresentare i dati personali, User per le credenziali e i ruoli e in più avrà OneToMany con Entità classe e sono previste le seguenti Entità: Voti, Assenze, Pagella.
+
+Anagrafica: dati anagrafici (come da precedenti esercizi) 
+
+Voto: Avrà docente che ha assegnato il voto, Studente che l’ha ricevuto, Data, Materia e voto numerico ricevuto.
+
+Assenza: Studente che ha fatto l’assenza, la data, l’ammontare di ore(se totale o parziale)
+
+Pagella: Avrà uno studente assegnato, i docenti che hanno assegnato i voti e i voti delle materie, verrà generata ogni quadrimestre.
+
+Docente: avrà una sua materia(enumerata), Anagrafica, User, Classi che segue, il suo orario, i voti assegnati.
+
+
+
+GENERAZIONE USERNAME
+PER GESTIRE IL CASO DI PIU' NOMI USA SPLIT PER TOKENIZZARLO IN PIU PARTI E USA SOLO IL PRIMO TOKEN, 
+QUINDI PRENDERA' SOLO IL PRIMO NOME E IL PRIMO COGNOME
+
+
+        String firstName = "John Ronald Reul";
+		String lastName = "Tolkien Edith Finch";
+		
+		String[] firstNameTokens = firstName.split("\\s+");
+	    String[] lastNameTokens = lastName.split("\\s+");
+	    
+	    // Get the first token of each name
+	    String firstNameToken = firstNameTokens[0].toLowerCase();
+	    String lastNameToken = lastNameTokens[0].toLowerCase();
+	    
+	    // Concatenate the first token of each name to create the username
+	   
+	    
+	    Random rnd = new Random();
+		int number = rnd.nextInt(999999);
+		String cod = String.format("%06d", number);
+		
+		 String username = firstNameToken + "_" + lastNameToken+cod;
+	    System.out.println(username);

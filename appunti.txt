@@ -1,0 +1,2 @@
+25/02
+Il primo passo è creare un repository e vedere se le entità sono salvabili oltre a confermare le relazioni
