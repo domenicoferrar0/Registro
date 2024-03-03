@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -29,8 +30,8 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.unprocessableEntity().body(errors);
 	}
 	
-	@ExceptionHandler(RoleNotFoundException.class)
-	public ResponseEntity<String> handleNotFoundException(RoleNotFoundException ex){
+	@ExceptionHandler({RoleNotFoundException.class, UsernameNotFoundException.class})
+	public ResponseEntity<String> handleNotFoundException(Exception ex){
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
 }
