@@ -1,30 +1,15 @@
 package com.ferraro.RegistroScolastico.mapper;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-
-import com.ferraro.RegistroScolastico.dto.StudenteDTO;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
-import com.ferraro.RegistroScolastico.entities.Studente;
+import com.ferraro.RegistroScolastico.entities.Docente;
 
 @Mapper(componentModel = "spring")
-public interface StudenteMapper {
+public interface DocenteMapper {
 
-	StudenteMapper INSTANCE = Mappers.getMapper(StudenteMapper.class);
-	
-	@Mapping(source = "user.email", target = "email")
-	public StudenteDTO studenteToDto(Studente studente);
-	
-	default List<StudenteDTO> studentiToDto(List<Studente> studenti){
-		return studenti.stream().map(this::studenteToDto).collect(Collectors.toList());
-	}
-	
-	@Mapping(source = "studenteDTO.email", target = "user.email")
-	public Studente dtoToStudente(StudenteDTO studenteDTO);
+	DocenteMapper INSTANCE = Mappers.getMapper(DocenteMapper.class);
 	
 	
 	@Mapping(source = "form.email", target = "user.email")
@@ -35,6 +20,8 @@ public interface StudenteMapper {
 	@Mapping(source = "form.indirizzo", target = "anagrafica.indirizzo")
 	@Mapping(source = "form.genere", target = "anagrafica.genere")
 	@Mapping(source = "form.luogoDiNascita", target = "anagrafica.luogoDiNascita")
-	public Studente formToStudente(RegistrationForm form);
-		
+	@Mapping(source = "form.materia", target = "materia")
+	public Docente formToDocente(RegistrationForm form);
+	
+	
 }

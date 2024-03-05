@@ -2,8 +2,13 @@ package com.ferraro.RegistroScolastico.entities;
 
 import java.util.Set;
 
+import com.ferraro.RegistroScolastico.enums.Materia;
+
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,6 +44,10 @@ public class Docente {
 	
 	@OneToMany(mappedBy = "docente")
 	private Set<Voto> voti;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Materia materia;
 	
 	@ManyToMany
 	@JoinTable(name = "docenti_classi",

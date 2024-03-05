@@ -3,6 +3,7 @@ package com.ferraro.RegistroScolastico.dto;
 import java.time.LocalDate;
 
 import com.ferraro.RegistroScolastico.enums.Genere;
+import com.ferraro.RegistroScolastico.enums.Materia;
 import com.ferraro.RegistroScolastico.enums.Provincia;
 
 import jakarta.persistence.Column;
@@ -20,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class StudenteForm {
+public class RegistrationForm {
 	@Size(min = 2, max = 35, message = "Questo campo deve avere un massimo di 35 caratteri ed un minimo di 2")
     @Pattern(regexp="\\S(\\s*[a-zA-Z]+)*\\s*", message = "Formato nome non valido, rimuovi gli spazi in eccesso e i caratteri non autorizzati")
     private String nome;
@@ -44,15 +45,15 @@ public class StudenteForm {
     private Genere genere;
     
     @Enumerated(EnumType.STRING)
-	 @Column(nullable = false)
+	@NotNull(message = "Richiesto il luogo di nascita")
     private Provincia luogoDiNascita;
     
     @NotBlank
     @Pattern(regexp ="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "Formato email non valido")
     private String email;
     
-    @NotBlank
-    @Pattern(regexp = "^(?=.*[!@#$%^&*(),.?\":{}|<>])(?=.*[A-Z]).{8,}$", message = "Formato password non valido, "
-			+ "deve contenere almeno 8 caratteri, una maiuscola ed un simbolo speciale")
-    private String password;
+    
+    
+    @Enumerated(EnumType.STRING)
+    private Materia materia;
 }

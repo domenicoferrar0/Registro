@@ -2,7 +2,6 @@ package com.ferraro.RegistroScolastico.configuration;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,20 +19,22 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 	
 	private final JwtService jwtService;
 	
 	
-	private final UserDetailsService myUserDetails;
+	private final MyUserDetails myUserDetails;
 
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 			@NonNull FilterChain filterChain) throws ServletException, IOException {
-		System.out.println("filtro");
+		logger.info("INSIDE THE FILTER");
 		final String authHeader = request.getHeader("Authorization");
 
 		final String userEmail;
@@ -44,10 +45,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 		
 		if(authHeader == null || !authHeader.startsWith("Bearer ")) {
 			filterChain.doFilter(request, response);
-			System.out.println("47");
+			logger.info("No auth");
 			return;
 		}
-		System.out.println("50");
+			logger.info("JWT present");
 		jwt = authHeader.substring(7);
 		userEmail = jwtService.extractUsername(jwt);
 		if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
