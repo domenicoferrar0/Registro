@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Summary</title>
+    <script src="axios-config.js"></script>
+    <style>
+       /* styles.css */
+
+/* Global styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px; /* Adjust max-width as needed */
+    width: 100%;
+    margin: 20px;
+}
+
+h2 {
+    text-align: center;
+    margin-top: 0;
+    color: #007bff; /* Primary color */
+}
+
+.info {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc; /* Separator line */
+    padding-bottom: 20px;
+}
+
+.info label {
+    font-weight: bold;
+}
+
+.info p {
+    margin: 5px 0;
+}
+
+/* Styling for specific fields */
+.info .anagrafica label {
+    color: #007bff; /* Primary color */
+}
+
+.info .anagrafica p {
+    margin-left: 20px;
+}
+
+.info .email label {
+    color: #28a745; /* Success color */
+}
+
+.info .anno label {
+    color: #dc3545; /* Error color */
+}
+
+.info .sezione label {
+    color: #6c757d; /* Secondary color */
+}
+       
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Student Summary</h2>
+        <div class="info" id="studentInfo">
+            <!-- Student information will be displayed here -->
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        // Function to create and append a new paragraph element
+        function createParagraph(label, value) {
+            const p = document.createElement('p');
+            p.innerHTML = `<label>${label}</label> ${value}`;
+            return p;
+        }
+
+        // Function to handle errors
+        function handleError(error) {
+            console.error('Error fetching student summary:', error);
+            const studentInfoDiv = document.getElementById('studentInfo');
+            studentInfoDiv.innerHTML = '<p>Error fetching student summary. Please try again later.</p>';
+        }
+
+        // Fetch student summary data using Axios
+        axios.get('/rest/api/v0/studente/summary')
+            .then(response => {
+                const student = response.data;
+                const studentInfoDiv = document.getElementById('studentInfo');
+
+                // Create and append elements for each property
+               
+
+                // Anagrafica section
+                const anagraficaDiv = document.createElement('div');
+                
+                anagraficaDiv.appendChild(createParagraph('Nome:', student.anagrafica.nome));
+                anagraficaDiv.appendChild(createParagraph('Cognome:', student.anagrafica.cognome));
+                if (student.anagrafica.nascita) {
+                    anagraficaDiv.appendChild(createParagraph('Data di nascita:', student.anagrafica.nascita));
+                }
+                if (student.anagrafica.cf) {
+                    anagraficaDiv.appendChild(createParagraph('Codice Fiscale:', student.anagrafica.cf));
+                }
+                if (student.anagrafica.indirizzo) {
+                    anagraficaDiv.appendChild(createParagraph('Indirizzo:', student.anagrafica.indirizzo));
+                }
+                if (student.anagrafica.genere) {
+                    anagraficaDiv.appendChild(createParagraph('Genere:', student.anagrafica.genere));
+                }
+                if (student.anagrafica.luogoDiNascita) {
+                    anagraficaDiv.appendChild(createParagraph('Luogo di nascita:', student.anagrafica.luogoDiNascita));
+                }
+                studentInfoDiv.appendChild(anagraficaDiv);
+
+                // Email
+                if (student.email) {
+                    studentInfoDiv.appendChild(createParagraph('Email:', student.email));
+                }
+
+                // Anno
+                if (student.anno) {
+                    studentInfoDiv.appendChild(createParagraph('Anno:', student.anno));
+                }
+
+                // Sezione
+                if (student.sezione) {
+                    studentInfoDiv.appendChild(createParagraph('Sezione:', student.sezione));
+                }
+            })
+            .catch(handleError);
+    </script>
+</body>
+</html>
+

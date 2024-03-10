@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="axios-config.js"></script>
 <title>Login Form</title>
 <style>
     body {
@@ -77,10 +78,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-function handleSuccess() {
+function handleSuccess(token) {
     // Display success message
     alert('Login successful');
-    // Store token in cookies
+   localStorage.setItem('jwt', token);
     // Redirect to another page or perform other actions as needed
 }
 
@@ -106,7 +107,8 @@ document.getElementById("loginForm").addEventListener("submit", function(event) 
     })
     .then(response => {
         if (response.status === 200) {
-            handleSuccess(); // Display success message and store token in cookies
+        const token = response.data;
+            handleSuccess(token); // Display success message and store token in cookies
         } else if (response.status === 401 || response.status === 404) {
             return response.data;
         } else {

@@ -15,6 +15,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,5 +49,6 @@ public class Voto {
 	
 	@DecimalMin(value = "0.0")
     @DecimalMax(value = "10.0")
+	@Column(nullable = false)
 	private Double voto;
 }

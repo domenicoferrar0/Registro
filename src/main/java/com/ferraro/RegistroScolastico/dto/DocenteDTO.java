@@ -1,20 +1,24 @@
 package com.ferraro.RegistroScolastico.dto;
 
+import com.ferraro.RegistroScolastico.enums.Materia;
+
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.util.Set;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class StudenteDTO {
-
+public class DocenteDTO {
+	
 	private Long id;
 	
 	private AnagraficaDTO anagrafica;
 	
 	private String email;
 	
-	private ClasseDTO classe;
-		
+	private Materia materia;
+	
+	private Set<ClasseDTO> classi;
 }

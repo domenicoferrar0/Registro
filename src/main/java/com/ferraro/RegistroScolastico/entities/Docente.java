@@ -1,5 +1,6 @@
 package com.ferraro.RegistroScolastico.entities;
 
+import java.util.Objects;
 import java.util.Set;
 
 import com.ferraro.RegistroScolastico.enums.Materia;
@@ -54,6 +55,23 @@ public class Docente {
 	joinColumns = @JoinColumn(name = "docente_id"),
 	inverseJoinColumns = @JoinColumn(name = "classe_id"))
 	private Set<Classe> classi;
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(anagrafica.getCf(), user.getEmail());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Docente other = (Docente) obj;
+		return anagrafica.getCf().equals(other.getAnagrafica().getCf()) || user.getEmail().equals(other.getUser().getEmail());
+	}
 	
 	
 	

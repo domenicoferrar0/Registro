@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.ferraro.RegistroScolastico.dto.ClasseDTO;
 import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.exceptions.ClasseAlreadyExistsException;
+import com.ferraro.RegistroScolastico.exceptions.ClasseNotFoundException;
 import com.ferraro.RegistroScolastico.mapper.ClasseMapper;
 import com.ferraro.RegistroScolastico.repository.ClasseRepository;
 
@@ -38,9 +39,15 @@ public class ClasseService {
 		return classeMapper.classesToDto(lista);
 	}
 	
-	public ClasseDTO findClasse(Integer anno, String sezione) {
+	public ClasseDTO findClasseDTO(Integer anno, String sezione) {
 		return classeRepository.findByAnnoAndSezione(anno, sezione)
 				.map(classeMapper::classeToDto)
 				.orElse(null);
 	}
+	
+	public Classe findClasse(Integer anno, String sezione) {
+		return classeRepository.findByAnnoAndSezione(anno, sezione)				
+				.orElseThrow(() -> new ClasseNotFoundException(anno+sezione));
+	}
+	
 }

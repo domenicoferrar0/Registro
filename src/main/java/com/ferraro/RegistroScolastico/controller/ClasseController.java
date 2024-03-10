@@ -2,6 +2,7 @@ package com.ferraro.RegistroScolastico.controller;
 
 import java.util.List;
 
+import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -25,34 +26,15 @@ public class ClasseController {
 	@Autowired
 	ClasseService classeService;
 
-	@PostMapping(value = "/save-classe")
-	public ResponseEntity<Object> saveClasse(@RequestBody @Valid ClasseDTO classeDTO) {
-		if (classeDTO == null) {
-			return ResponseEntity.unprocessableEntity()
-					.body("Si è verificato un problema, esegui una richiesta in modo appropriato");
-		}
-		ClasseDTO newClasse;
-		try {
-			newClasse = classeService.saveClasse(classeDTO);
-		} catch (DataAccessException e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Si è verificato un errore nel server, prova più tardi");
-		}
-		return ResponseEntity.status(HttpStatus.CREATED).body(newClasse);
-	}
 
-	@GetMapping(value = "/get-classi")
-	public ResponseEntity<List<ClasseDTO>> getClasses() {
-		return ResponseEntity.ok(classeService.findAll());
-	}
 
 	@GetMapping(value = "/get-classe")
-	public ResponseEntity<Object> getClasse(@RequestParam(value = "anno") Integer anno,
-			@RequestParam(value = "sezione") String sezione) {
-		if (anno == null || sezione == null || anno < 1 || anno > 3 || sezione.isBlank()) {
+	public ResponseEntity<Object> getClasse(@RequestParam(value = "anno", required = true) Integer anno,
+			@RequestParam(value = "sezione", required = true) String sezione) {
+		if (anno < 1 || anno > 3 || sezione.isBlank()) {
 			return ResponseEntity.unprocessableEntity().body("Inserisci i parametri in forma appropriata");
 		}
-		ClasseDTO classe = classeService.findClasse(anno, sezione);
+		ClasseDTO classe = classeService.findClasseDTO(anno, sezione);
 		if (classe == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Classe non trovata: " + anno + sezione);
 		}

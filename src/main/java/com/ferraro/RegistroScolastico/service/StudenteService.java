@@ -3,16 +3,22 @@ package com.ferraro.RegistroScolastico.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ferraro.RegistroScolastico.dto.StudenteDTO;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
+import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
+import com.ferraro.RegistroScolastico.exceptions.PersonNotFoundException;
+import com.ferraro.RegistroScolastico.exceptions.StudentHasAlreadyClassException;
 import com.ferraro.RegistroScolastico.mapper.StudenteMapper;
 import com.ferraro.RegistroScolastico.repository.AnagraficaRepository;
 import com.ferraro.RegistroScolastico.repository.StudenteRepository;
 import com.ferraro.RegistroScolastico.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class StudenteService {
@@ -40,8 +46,37 @@ public class StudenteService {
 		return studenteMapper.formToStudente(form);
 	}
 	
+	@Transactional
 	public StudenteDTO saveStudente(Studente studente) {
 		Studente nuovoStudente = studenteRepository.save(studente);
 		return studenteMapper.studenteToDto(nuovoStudente);
 	}
+	
+	public StudenteDTO findByEmail(String email) {
+		Studente studente = studenteRepository.findByUser_Email(email)
+				.orElseThrow(()-> new UsernameNotFoundException(email));
+		return studenteMapper.studenteToDto(studente);
+	}
+	
+	public Studente findByCf(String cf) {
+		return studenteRepository.findByAnagrafica_Cf(cf)
+				.orElseThrow(() -> new PersonNotFoundException(cf));
+	}
+	
+	@Transactional
+	public StudenteDTO assignClasse(Studente studente, Classe classe) {
+		
+		if (studente.getClasse() != null) {
+			throw new StudentHasAlreadyClassException(studenteMapper.studenteToDto(studente));
+		}
+		studente.setClasse(classe);
+		
+		studenteRepository.save(studente);
+		
+			
+		return studenteMapper.studenteToDto(studente);
+	}
+	
+	
+	
 }

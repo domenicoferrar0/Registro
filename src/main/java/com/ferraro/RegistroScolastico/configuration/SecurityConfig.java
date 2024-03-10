@@ -24,6 +24,8 @@ import com.ferraro.RegistroScolastico.service.MyUserDetails;
 @Configuration
 @Slf4j
 public class SecurityConfig {
+	
+	final private String API = "/rest/api/v0";
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -46,21 +48,17 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		return http.csrf(AbstractHttpConfigurer::disable)
-				.authorizeHttpRequests(registry -> {
-			registry.requestMatchers("/admin/**").hasRole("ADMIN");
-			registry.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN");
-			registry.requestMatchers("/studente/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STUDENT");
-			registry.requestMatchers("/hello/**").permitAll();
-			registry.requestMatchers("/rest/api/v0/home/**").permitAll();
+				.authorizeHttpRequests(registry -> { //Per avere sia le API che gli url regolari autorizzati in base al ruolo
+			registry.requestMatchers(API.concat("/admin/**"),"/admin/**").hasAuthority("ROLE_ADMIN");
+			registry.requestMatchers(API.concat("/studente/**"), "/studente/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STUDENT");
+			registry.requestMatchers(API.concat("/docente/**"), "/docente/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_DOCENTE");
+			registry.requestMatchers(API.concat("/home/**"), "/home/**").permitAll();
 			registry.anyRequest().authenticated();
 
 		}).formLogin(httpSecurityFormLoginConfigurer -> {
 			httpSecurityFormLoginConfigurer.loginPage("/login")			
 			.permitAll();
 		}).httpBasic(Customizer.withDefaults())
-				.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer
-						.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 				.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.build();

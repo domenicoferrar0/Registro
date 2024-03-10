@@ -12,10 +12,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.ferraro.RegistroScolastico.dto.ApiResponse;
+import com.ferraro.RegistroScolastico.dto.StudenteDTO;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler({ClasseAlreadyExistsException.class,  DuplicateRegistrationException.class})
+	@ExceptionHandler({ ClasseAlreadyExistsException.class, DuplicateRegistrationException.class })
 	public ResponseEntity<String> handleConflictException(Exception ex) {
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 	}
@@ -29,9 +32,20 @@ public class GlobalExceptionHandler {
 		}
 		return ResponseEntity.unprocessableEntity().body(errors);
 	}
-	
-	@ExceptionHandler({RoleNotFoundException.class, UsernameNotFoundException.class})
-	public ResponseEntity<String> handleNotFoundException(Exception ex){
+
+	@ExceptionHandler({ RoleNotFoundException.class, UsernameNotFoundException.class, PersonNotFoundException.class,
+			ClasseNotFoundException.class, ResourceNotFoundException.class })
+	public ResponseEntity<String> handleNotFoundException(Exception ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(StudentHasAlreadyClassException.class)
+	public ResponseEntity<ApiResponse<?>> handleClassException(StudentHasAlreadyClassException ex) {
+		ApiResponse<StudenteDTO> response = new ApiResponse();
+		response.setData(ex.getStudente());
+		response.setMessage(ex.getMessage());
+		response.setStatus(HttpStatus.CONFLICT);
+
+		return ResponseEntity.status(response.getStatus()).body(response);
 	}
 }

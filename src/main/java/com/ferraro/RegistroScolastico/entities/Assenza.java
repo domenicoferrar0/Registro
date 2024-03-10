@@ -1,6 +1,9 @@
 package com.ferraro.RegistroScolastico.entities;
 
 import java.time.LocalDate;
+
+import org.hibernate.validator.constraints.Range;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,7 +17,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,7 +43,7 @@ public class Assenza {
 	private LocalDate data;
 	
 	@Column(nullable = false)
-	@Positive(message = "le ore di assenza non possono essere negative")
+	@Range(min = 1, max = 6)
 	private Integer ore;
 
 }

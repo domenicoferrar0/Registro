@@ -13,16 +13,7 @@ public class PagineController {
 	
 	@GetMapping("/studente/home")
 	public String showHomePage() {
-		return "homepage";
+		return "studente-homepage";
 	}
 	
-	@GetMapping("/admin/home")
-	public String showAdminHomePage() {
-		return "adminhomepage";
-	}
-	
-	@GetMapping("/hello/world")
-	public String helloWorld() {
-		return "HELLOWORLD";
-	}
 }

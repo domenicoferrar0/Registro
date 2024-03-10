@@ -6,7 +6,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -34,26 +33,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 			@NonNull FilterChain filterChain) throws ServletException, IOException {
-		logger.info("INSIDE THE FILTER");
+		log.info("INSIDE THE FILTER");
 		final String authHeader = request.getHeader("Authorization");
 
 		final String userEmail;
 
 		final String jwt;
 		
-		
+		log.info("header {}", authHeader);
 		
 		if(authHeader == null || !authHeader.startsWith("Bearer ")) {
 			filterChain.doFilter(request, response);
-			logger.info("No auth");
+			log.info("No auth");
 			return;
 		}
-			logger.info("JWT present");
+			log.info("JWT present");
 		jwt = authHeader.substring(7);
+		log.info("prima di estrarre");
 		userEmail = jwtService.extractUsername(jwt);
+		log.info("post estrazione");
 		if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			UserDetails userDetails = this.myUserDetails.loadUserByUsername(userEmail);
 			if(jwtService.isTokenValid(jwt, userDetails)) {
+				log.info("token valido");
 				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
 						userDetails, null, userDetails.getAuthorities());
 				
@@ -62,6 +64,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 				SecurityContextHolder.getContext().setAuthentication(authToken);
 			}
 		}
+		log.info("autenticato");
 		filterChain.doFilter(request, response);
 	}
 
