@@ -43,7 +43,7 @@ public class Assenza {
 	private LocalDate data;
 	
 	@Column(nullable = false)
-	@Range(min = 1, max = 6)
+	@Range(min = 1, max = 6, message = "le ore di assenza variano da 1 a 6")
 	private Integer ore;
 
 }

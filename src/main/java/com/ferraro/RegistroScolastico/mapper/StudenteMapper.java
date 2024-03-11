@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import com.ferraro.RegistroScolastico.dto.StudenteDTO;
+import com.ferraro.RegistroScolastico.dto.StudenteDTOSimple;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Studente;
 
@@ -36,5 +37,12 @@ public interface StudenteMapper {
 	@Mapping(source = "form.genere", target = "anagrafica.genere")
 	@Mapping(source = "form.luogoDiNascita", target = "anagrafica.luogoDiNascita")
 	public Studente formToStudente(RegistrationForm form);
+	
+	
+	@Mapping(source = "anagrafica.nome", target = "nome")
+	@Mapping(source = "anagrafica.cognome", target = "cognome")
+	@Mapping(source = "anagrafica.cf", target = "cf")
+	public StudenteDTOSimple studenteToDtoSimple(Studente studente);
+	
 		
 }

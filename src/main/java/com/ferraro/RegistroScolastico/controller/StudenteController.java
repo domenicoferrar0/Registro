@@ -28,9 +28,12 @@ public class StudenteController {
 	@GetMapping("/summary")
 	public ResponseEntity<?> studenteDashboard(@NonNull @RequestHeader("Authorization") String authorization){
 		log.info("api summary studente {}", authorization);
+		
+		//Estraggo lo studente attraverso il Token
 		String token = authorization.substring(7);
 		String email = jwtService.extractUsername(token);
-		StudenteDTO studente = studenteService.findByEmail(email);
+		
+		StudenteDTO studente = studenteService.findByEmail(email); //404 GESTITO
 		return ResponseEntity.ok().body(studente);
 	}
 

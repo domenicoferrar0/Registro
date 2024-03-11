@@ -16,6 +16,6 @@ public interface AssenzaRepository extends JpaRepository<Assenza, Long>{
 	public Boolean existsByStudenteAndData(Studente studente, LocalDate data);
 	
 	@Modifying
-	@Query("delete from assenza a where a.id = 1?")
-	Boolean removeById(Long id);
+	@Query("delete from Assenza a where a.id = ?1")
+	int removeById(Long id);
 }

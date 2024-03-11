@@ -5,22 +5,17 @@ import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Setter
 @Getter
 public class VotoDTO {
-	
+
 	private Long id;
-		
-	
-	private StudenteDTO studente;
-	
-	
+
+	private StudenteDTOSimple studente;
+
 	private LocalDate data;
-		
-	
-	private DocenteDTO docente;
-	
-	
+
+	private DocenteDTOSimple docente;
+
 	private Double voto;
 }

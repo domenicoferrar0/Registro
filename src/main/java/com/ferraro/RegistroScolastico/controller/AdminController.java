@@ -16,15 +16,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ferraro.RegistroScolastico.dto.ApiResponse;
+import com.ferraro.RegistroScolastico.dto.AssenzaDTO;
 import com.ferraro.RegistroScolastico.dto.ClasseDTO;
 import com.ferraro.RegistroScolastico.dto.DocenteDTO;
 import com.ferraro.RegistroScolastico.dto.StudenteDTO;
+import com.ferraro.RegistroScolastico.dto.VotoDTO;
 import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
+import com.ferraro.RegistroScolastico.service.AssenzaService;
 import com.ferraro.RegistroScolastico.service.ClasseService;
 import com.ferraro.RegistroScolastico.service.DocenteService;
 import com.ferraro.RegistroScolastico.service.StudenteService;
+import com.ferraro.RegistroScolastico.service.VotoService;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +46,14 @@ public class AdminController {
 
 	@Autowired
 	private DocenteService docenteService;
+	
+	@Autowired
+	private VotoService votoService;
+	
+	@Autowired
+	private AssenzaService assenzaService;
 
+	// I GET GENERALI SONO RISERVATI AGLI ADMIN
 	@GetMapping(value = "/get-studenti")
 	public ResponseEntity<List<StudenteDTO>> getAllStudenti() {
 		return ResponseEntity.ok(studenteService.findAll());
@@ -57,13 +68,23 @@ public class AdminController {
 	public ResponseEntity<List<ClasseDTO>> getClasses() {
 		return ResponseEntity.ok(classeService.findAll());
 	}
+	
+	@GetMapping(value = "/get-voti")
+	public ResponseEntity<List<VotoDTO>> getVoti(){
+		return ResponseEntity.ok(votoService.findAll());
+	}
+	
+	@GetMapping(value = "/get-assenze")
+	public ResponseEntity<List<AssenzaDTO>> getAssenze(){
+		return ResponseEntity.ok(assenzaService.findAll());
+	}
 
 	@PostMapping(value = "/save-classe")
 	public ResponseEntity<?> saveClasse(@RequestBody @NonNull @Valid ClasseDTO classeDTO) {
 
 		ClasseDTO newClasse;
 		try {
-			newClasse = classeService.saveClasse(classeDTO);
+			newClasse = classeService.saveClasse(classeDTO); // Controlla prima se esiste già
 		} catch (DataAccessException e) {
 			log.error("exception Salvataggio classe", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -77,12 +98,12 @@ public class AdminController {
 	@PutMapping(value = "/studente-assign-classe")
 	public ResponseEntity<?> assignClasseToStudente(@RequestBody @NonNull @Valid ClasseDTO classeDTO,
 			@RequestParam(value = "studenteCF", required = true) String cf) {
-		Studente studente = studenteService.findByCf(cf);
-		Classe classe = classeService.findClasse(classeDTO.getAnno(), classeDTO.getSezione());
+		Studente studente = studenteService.findByCf(cf); // 404
+		Classe classe = classeService.findClasse(classeDTO.getAnno(), classeDTO.getSezione()); // 404
 		StudenteDTO studenteAggiornato;
-		try {
+		try { // Controlla se lo studente non ha già una classe, exception gestita
 			studenteAggiornato = studenteService.assignClasse(studente, classe);
-		} catch (Exception e) {
+		} catch (DataAccessException e) {
 			log.error("exception assegnazione classe studente", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Si è verificato un errore nel server, riprova più tardi");
@@ -96,12 +117,13 @@ public class AdminController {
 		Docente docente = docenteService.findByCf(cf);
 		Classe classe = classeService.findClasse(classeDTO.getAnno(), classeDTO.getSezione());
 		DocenteDTO docenteAggiornato;
-		//Funziona solo se quella materia non è già occupata o se quel docente non è già presente nella classe
+		// Funziona solo se quella materia non è già occupata o se quel docente non è
+		// già presente nella classe
 		if (!docenteService.assignClasse(docente, classe)) {
 			return ResponseEntity.status(HttpStatus.CONFLICT)
 					.body("Impossibile assegnare classe, docente già assegnato a quella classe o materia occupata");
 		}
-		
+
 		docente.getClassi().add(classe);
 
 		try {

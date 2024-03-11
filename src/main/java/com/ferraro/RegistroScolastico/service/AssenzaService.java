@@ -1,12 +1,17 @@
 package com.ferraro.RegistroScolastico.service;
 
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ferraro.RegistroScolastico.dto.AssenzaDTO;
 import com.ferraro.RegistroScolastico.dto.AssenzaRequest;
 import com.ferraro.RegistroScolastico.entities.Assenza;
+import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
+import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.mapper.AssenzaMapper;
 import com.ferraro.RegistroScolastico.repository.AssenzaRepository;
@@ -23,8 +28,13 @@ public class AssenzaService {
 	private AssenzaMapper assenzaMapper;
 	
 	public Assenza creaAssenza(Studente studente, AssenzaRequest request) {
+		if (studente.getClasse() == null) {
+			throw new IllegalArgumentException("Uno studente non può avere avere assenze se non ha una classe");
+		}
+		
 		if(assenzaRepository.existsByStudenteAndData(studente, request.getData())) {
-			throw new IllegalArgumentException("Uno studente non può avere più assenze nello stesso giorno");
+			throw new IllegalArgumentException("Impossibile inserire l'assenza, questo studente è già stato segnato assente in questa data: "
+					.concat(request.getData().toString()));
 		}
 		Assenza assenza = assenzaMapper.requestToVoto(request);
 		assenza.setStudente(studente);
@@ -43,12 +53,21 @@ public class AssenzaService {
 				.orElseThrow(() -> new ResourceNotFoundException(id));
 	}
 	
+	@Transactional
 	public boolean deleteAssenza(Long id) {
+		System.out.println(id);
 		try {
-			return assenzaRepository.removeById(id);
+			return assenzaRepository.removeById(id)>0;
 		}
 		catch(Exception e) {
+			e.printStackTrace();;
 			return false;
 		}
+	}
+	
+	public List<AssenzaDTO> findAll(){
+		List<Assenza> assenze = assenzaRepository.findAll();
+		return assenzaMapper.assenzeToDto(assenze);
+		
 	}
 }

@@ -1,6 +1,6 @@
 package com.ferraro.RegistroScolastico.dto;
 
-import java.time.LocalDate;
+import com.ferraro.RegistroScolastico.enums.Materia;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,15 +9,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class AssenzaDTO {
+public class DocenteDTOSimple {
 	
 	private Long id;
+
+	private String nome;
+
+	private String cognome;
+
+	private String cf;
 	
-	private LocalDate data;
-	
-	private Integer ore;
-	
-	private StudenteDTOSimple studente;
-	
-	
+	private Materia materia;
+
 }

@@ -11,6 +11,6 @@ import com.ferraro.RegistroScolastico.entities.Voto;
 public interface VotoRepository extends JpaRepository<Voto, Long>{
 	
 	@Modifying
-	@Query("delete from voto v where v.id = 1?")
-	Boolean removeById(Long id);
+	@Query("delete from Voto v where v.id = ?1")
+	int removeById(Long id);
 }

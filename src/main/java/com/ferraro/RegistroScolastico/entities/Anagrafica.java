@@ -27,6 +27,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Anagrafica {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

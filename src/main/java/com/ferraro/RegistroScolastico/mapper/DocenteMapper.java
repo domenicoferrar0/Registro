@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import com.ferraro.RegistroScolastico.dto.DocenteDTO;
+import com.ferraro.RegistroScolastico.dto.DocenteDTOSimple;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Docente;
 
@@ -34,4 +35,9 @@ public interface DocenteMapper {
 	default List<DocenteDTO> docentiToDto(List<Docente> docenti){
 		return docenti.stream().map(this::docenteToDto).collect(Collectors.toList());
 	}
+	
+	@Mapping(source = "anagrafica.nome", target = "nome")
+	@Mapping(source = "anagrafica.cognome", target = "cognome")
+	@Mapping(source = "anagrafica.cf", target = "cf")
+	public DocenteDTOSimple docenteToDtoSimple(Docente docente);
 }

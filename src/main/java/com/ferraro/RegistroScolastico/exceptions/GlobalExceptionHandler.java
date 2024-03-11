@@ -48,4 +48,9 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(response.getStatus()).body(response);
 	}
+	
+	@ExceptionHandler(DocenteUnauthorizedException.class)
+	public ResponseEntity<?> docenteUnauthorizedException(DocenteUnauthorizedException ex){
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+	}
 }

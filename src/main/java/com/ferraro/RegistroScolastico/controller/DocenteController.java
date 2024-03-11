@@ -51,14 +51,18 @@ public class DocenteController {
 
 	@PostMapping(value = "/inserimento-voto")
 	public ResponseEntity<?> assegnaVoto(@RequestHeader("Authorization") String authorization,
-			@NonNull @Valid VotoRequest request) {
+			@RequestBody @NonNull @Valid VotoRequest request) {
+		
+		//Risaliamo a chi sta facendo la richiesta attraverso il token di autorizzazione
 		String token = authorization.substring(7);
 		log.info("inserimento voto {}", token);
 		String email = jwtService.extractUsername(token);
-		// I METODI DI FETCH SONO GESTITI DA EXCEPTION HANDLER IN CASO NON CI SIANO
-		// CORRISPONDENZE
+		
+		//I metodi di fetch sono gestiti da ExceptionHandler in caso di not found
 		Docente docente = docenteService.findByEmail(email);
 		Studente studente = studenteService.findByCf(request.getStudenteCF());
+		
+		//Exception gestita se lo studente non ha classe o se il docente non è un suo docente
 		Voto voto = votoService.creaVoto(docente, studente, request);
 		VotoDTO newVoto;
 		try {
@@ -74,17 +78,18 @@ public class DocenteController {
 	@PostMapping(value = "/inserimento-assenza")
 	public ResponseEntity<?> inserisciAssenza(@RequestBody @NonNull @Valid AssenzaRequest request) {
 		log.info("inserimento assenza");
-		Studente studente = studenteService.findByCf(request.getStudenteCF());
+		
+		Studente studente = studenteService.findByCf(request.getStudenteCF()); //404 Gestito
 		AssenzaDTO nuovaAssenza;
 		try {
+			//IllegalArgument se lo studente non ha ancora una classe o se è già stata segnata un'assenza quel giorno
 			Assenza assenza = assenzaService.creaAssenza(studente, request);
 			nuovaAssenza = assenzaService.salvaAssenza(assenza);
 
 		} catch (IllegalArgumentException e) {
-			log.error("eccezione illegal argument in inserisci assenza", e);
+			
 			return ResponseEntity.status(HttpStatus.CONFLICT)
-					.body("Impossibile inserire l'assenza, questo studente è già stato segnato assente in questa data: "
-							.concat(request.getData().toString()));
+					.body(e.getMessage());
 		} catch (Exception e) {
 			log.error("Eccezione generica salvataggio assenza ", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -101,13 +106,18 @@ public class DocenteController {
 		Voto voto = votoService.findById(id); // 404 SE NON LO TROVA
 		String token = authorization.substring(7);
 		log.info("delete voto {}", token);
-		String email = jwtService.extractUsername(token); // risale al docente dal token
+		
+		// risale al docente dal token
+		String email = jwtService.extractUsername(token); 
 		Docente docente = docenteService.findByEmail(email);
+		
+		//Solo chi ha inserito il voto può rimuoverlo
 		if (!voto.getDocente().equals(docente)) {
-			log.error("docenti non combaciano", voto.getDocente().equals(docente));
+			log.error("docenti non combaciano {}", voto.getDocente().equals(docente));
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body("Spiacente, solo il docente che ha inserito il voto può eliminarlo");
 		}
+		//Booleano dal repository che verifica se l'operazione ha successo
 		if (!votoService.deleteVoto(id)) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Non è stato possibile cancellare questo voto");
 		}
@@ -116,6 +126,8 @@ public class DocenteController {
 	
 	@DeleteMapping(value = "/delete-assenza/{id}")
 	public ResponseEntity<?> deleteAssenza(@PathVariable("id") Long id){
+		//anche qui booleano dal repository
+		System.out.println(id);
 		if(!assenzaService.deleteAssenza(id)) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Si è verificato un errore, l'assenza potrebbe non esistere");
 		}
