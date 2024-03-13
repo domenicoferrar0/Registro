@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,12 +16,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.ferraro.RegistroScolastico.dto.ApiResponse;
 import com.ferraro.RegistroScolastico.dto.StudenteDTO;
 
+import io.jsonwebtoken.ExpiredJwtException;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler({ ClasseAlreadyExistsException.class, DuplicateRegistrationException.class })
-	public ResponseEntity<String> handleConflictException(Exception ex) {
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+	@ExceptionHandler({ ClasseAlreadyExistsException.class, DuplicateRegistrationException.class, ClassAssignException.class })
+	public ResponseEntity<ApiResponse> handleConflictException(CustomException ex) {
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.conflict(ex.getMessage(), ex.getObject()));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -39,18 +42,14 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
 
-	@ExceptionHandler(StudentHasAlreadyClassException.class)
-	public ResponseEntity<ApiResponse<?>> handleClassException(StudentHasAlreadyClassException ex) {
-		ApiResponse<StudenteDTO> response = new ApiResponse();
-		response.setData(ex.getStudente());
-		response.setMessage(ex.getMessage());
-		response.setStatus(HttpStatus.CONFLICT);
-
-		return ResponseEntity.status(response.getStatus()).body(response);
-	}
 	
 	@ExceptionHandler(DocenteUnauthorizedException.class)
-	public ResponseEntity<?> docenteUnauthorizedException(DocenteUnauthorizedException ex){
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+	public ResponseEntity<ApiResponse> docenteUnauthorizedException(DocenteUnauthorizedException ex){
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.unauthorized(ex.getMessage(), ex.getDocente()));
+	}
+	
+	@ExceptionHandler(ExpiredJwtException.class)
+	public ResponseEntity<String> handleJwtExpiring(ExpiredJwtException ex){
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("autorizzazione scaduta rieffettua il login");
 	}
 }

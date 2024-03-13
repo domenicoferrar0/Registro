@@ -1,7 +1,6 @@
 package com.ferraro.RegistroScolastico.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +25,7 @@ public class StudenteController {
 	private JwtService jwtService;
 
 	@GetMapping("/summary")
-	public ResponseEntity<?> studenteDashboard(@NonNull @RequestHeader("Authorization") String authorization){
+	public ResponseEntity<?> studenteSummary(@NonNull @RequestHeader("Authorization") String authorization){
 		log.info("api summary studente {}", authorization);
 		
 		//Estraggo lo studente attraverso il Token

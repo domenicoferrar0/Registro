@@ -1,8 +1,8 @@
 package com.ferraro.RegistroScolastico.exceptions;
 
-public class DuplicateRegistrationException extends RuntimeException{
+public class DuplicateRegistrationException extends CustomException{
 
-	public DuplicateRegistrationException(String cf, String email) {
-		super("Attenzione, utente già registrato, controlla Codice Fiscale ed email:"+cf+", "+email);
+	public DuplicateRegistrationException(Object object) {
+		super("Attenzione, utente già registrato, controlla Codice Fiscale ed email", object);
 	}
 }

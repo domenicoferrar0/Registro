@@ -1,9 +1,13 @@
 25/02
 Il primo passo è creare un repository e vedere se le entità sono salvabili oltre a confermare le relazioni
 
-TOKEN ADMIN
-eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huZG9lMTBAZXhhbXBsZS5jb20iLCJhdXRob3JpdGllcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwiaWF0IjoxNzEwMTY1MzY2LCJleHAiOjE3MTA0NTMzNjZ9.ZkDJqH9OXS0w3FGYL-VW9E47NnSDZlbdRoeAn3ppFzc
 
+johndoe10@example.com
+51e90742-2bb1-432f-a347-c1f8089610c1
+TOKEN ADMIN
+eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huZG9lMTBAZXhhbXBsZS5jb20iLCJhdXRob3JpdGllcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwiaWF0IjoxNzEwMzQ4NTE2LCJleHAiOjE3MTAzNzczMTZ9.BcOArYrboW2zhmdvChzFVW8ut0hO7_qBX0OPgxUp8so
+
+studente:
 johndoe4@example.com
 c11db8bc-5cbe-479d-86e9-d775b86cf363
 

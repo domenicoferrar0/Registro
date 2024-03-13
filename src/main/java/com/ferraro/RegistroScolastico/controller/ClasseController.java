@@ -1,23 +1,15 @@
 package com.ferraro.RegistroScolastico.controller;
 
-import java.util.List;
-
-import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ferraro.RegistroScolastico.dto.ClasseDTO;
 import com.ferraro.RegistroScolastico.service.ClasseService;
-
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "rest/api/v0")

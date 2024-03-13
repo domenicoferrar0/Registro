@@ -12,6 +12,7 @@ import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.entities.Voto;
 import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
+import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
 import com.ferraro.RegistroScolastico.mapper.VotoMapper;
 import com.ferraro.RegistroScolastico.repository.VotoRepository;
 
@@ -25,6 +26,9 @@ public class VotoService {
 
 	@Autowired
 	private VotoRepository votoRepository;
+	
+	@Autowired
+	private DocenteMapper docenteMapper;
 
 	public List<VotoDTO> findAll() {
 		List<Voto> voti = votoRepository.findAll();
@@ -34,13 +38,13 @@ public class VotoService {
 	public Voto creaVoto(Docente docente, Studente studente, VotoRequest request) {
 		if (studente.getClasse() == null) {
 			
-			throw new DocenteUnauthorizedException(docente.getAnagrafica().getCf());
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 			
 		}
 		Set<Docente> docentiClasse = studente.getClasse().getDocenti();
 		if (!docentiClasse.contains(docente)) {
 			
-			throw new DocenteUnauthorizedException(docente.getAnagrafica().getCf());
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
 		Voto voto = votoMapper.requestToVoto(request);
 		voto.setDocente(docente);

@@ -12,7 +12,7 @@ import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
 import com.ferraro.RegistroScolastico.exceptions.PersonNotFoundException;
-import com.ferraro.RegistroScolastico.exceptions.StudentHasAlreadyClassException;
+import com.ferraro.RegistroScolastico.exceptions.ClassAssignException;
 import com.ferraro.RegistroScolastico.mapper.StudenteMapper;
 import com.ferraro.RegistroScolastico.repository.AnagraficaRepository;
 import com.ferraro.RegistroScolastico.repository.StudenteRepository;
@@ -41,7 +41,7 @@ public class StudenteService {
 	
 	public Studente formToStudente(RegistrationForm form) {
 		if(userRepository.existsByEmail(form.getEmail()) || anagraficaRepository.existsByCf(form.getCf())) {
-			throw new DuplicateRegistrationException(form.getCf(), form.getEmail());
+			throw new DuplicateRegistrationException(form);
 		}
 		return studenteMapper.formToStudente(form);
 	}
@@ -66,8 +66,8 @@ public class StudenteService {
 	@Transactional
 	public StudenteDTO assignClasse(Studente studente, Classe classe) {
 		
-		if (studente.getClasse() != null) {
-			throw new StudentHasAlreadyClassException(studenteMapper.studenteToDto(studente));
+		if (studente.getClasse() != null) {			//Passo messaggio indicativo con oggetto a cui fa riferimento
+			throw new ClassAssignException("Questo studente ha già una classe", studenteMapper.studenteToDto(studente));
 		}
 		studente.setClasse(classe);
 		

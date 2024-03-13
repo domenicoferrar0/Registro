@@ -2,6 +2,8 @@ package com.ferraro.RegistroScolastico.dto;
 
 import org.hibernate.validator.constraints.Range;
 
+import com.ferraro.RegistroScolastico.entities.Periodo;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ClasseDTO {
 	
+	
 	private Long id;
 	
 	@NotNull(message = "Anno richiesto")
@@ -21,6 +24,8 @@ public class ClasseDTO {
 	private Integer anno;
 
 	@NotBlank(message = "Sezione richiesta")
-	@Pattern(regexp = "^[A-Z]$", message = "La sezione è identificata da una singola lettera dell'alfabeto")
+	@Pattern(regexp = "^[A-Z]$", message = "La sezione è identificata da una singola lettera dell'alfabeto maiuscola")
 	private String sezione;
+	
+	private Periodo periodo;
 }

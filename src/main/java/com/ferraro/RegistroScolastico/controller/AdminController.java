@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ferraro.RegistroScolastico.dto.ApiResponse;
 import com.ferraro.RegistroScolastico.dto.AssenzaDTO;
 import com.ferraro.RegistroScolastico.dto.ClasseDTO;
 import com.ferraro.RegistroScolastico.dto.DocenteDTO;
@@ -96,10 +95,10 @@ public class AdminController {
 	// Questo metodo è pensato solo per assegnare la classe a chi non ce l'ha
 	// ancora, è da fare un metodo più esplicito in caso di cambio classe
 	@PutMapping(value = "/studente-assign-classe")
-	public ResponseEntity<?> assignClasseToStudente(@RequestBody @NonNull @Valid ClasseDTO classeDTO,
+	public ResponseEntity<?> assignClasseToStudente(@RequestParam(value = "classeId", required = true) Long id,
 			@RequestParam(value = "studenteCF", required = true) String cf) {
 		Studente studente = studenteService.findByCf(cf); // 404
-		Classe classe = classeService.findClasse(classeDTO.getAnno(), classeDTO.getSezione()); // 404
+		Classe classe = classeService.findById(id); // 404
 		StudenteDTO studenteAggiornato;
 		try { // Controlla se lo studente non ha già una classe, exception gestita
 			studenteAggiornato = studenteService.assignClasse(studente, classe);
@@ -112,28 +111,21 @@ public class AdminController {
 	}
 
 	@PutMapping(value = "/docente-assign-classe")
-	public ResponseEntity<?> assignClasseToDocente(@RequestBody @NonNull @Valid ClasseDTO classeDTO,
+	public ResponseEntity<?> assignClasseToDocente(@RequestParam(value = "classeId", required = true) Long id,
 			@RequestParam(value = "docenteCF", required = true) String cf) {
 		Docente docente = docenteService.findByCf(cf);
-		Classe classe = classeService.findClasse(classeDTO.getAnno(), classeDTO.getSezione());
+		Classe classe = classeService.findById(id);
 		DocenteDTO docenteAggiornato;
 		// Funziona solo se quella materia non è già occupata o se quel docente non è
 		// già presente nella classe
-		if (!docenteService.assignClasse(docente, classe)) {
-			return ResponseEntity.status(HttpStatus.CONFLICT)
-					.body("Impossibile assegnare classe, docente già assegnato a quella classe o materia occupata");
-		}
-
-		docente.getClassi().add(classe);
-
 		try {
-			docenteAggiornato = docenteService.saveDocente(docente);
+			docenteAggiornato = docenteService.assignClasse(docente, classe);
 		}
 
-		catch (Exception e) {
+		catch (DataAccessException e) {
 			log.error("Exception assegnazione classe docente", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Si è verificato un errore riprova più tardi");
+					.body("Si è verificato un errore nel server riprova più tardi");
 		}
 		return ResponseEntity.ok().body(docenteAggiornato);
 	}

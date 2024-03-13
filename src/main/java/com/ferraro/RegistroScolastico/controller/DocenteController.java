@@ -1,10 +1,12 @@
 package com.ferraro.RegistroScolastico.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,15 +14,19 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ferraro.RegistroScolastico.dto.ApiResponse;
 import com.ferraro.RegistroScolastico.dto.AssenzaDTO;
 import com.ferraro.RegistroScolastico.dto.AssenzaRequest;
+import com.ferraro.RegistroScolastico.dto.DocenteDTO;
 import com.ferraro.RegistroScolastico.dto.VotoDTO;
 import com.ferraro.RegistroScolastico.dto.VotoRequest;
 import com.ferraro.RegistroScolastico.entities.Assenza;
+import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.entities.Voto;
 import com.ferraro.RegistroScolastico.service.AssenzaService;
+import com.ferraro.RegistroScolastico.service.ClasseService;
 import com.ferraro.RegistroScolastico.service.DocenteService;
 import com.ferraro.RegistroScolastico.service.JwtService;
 import com.ferraro.RegistroScolastico.service.StudenteService;
@@ -48,9 +54,37 @@ public class DocenteController {
 
 	@Autowired
 	private AssenzaService assenzaService;
+	
+	@Autowired
+	private ClasseService classeService;
+	
+	@GetMapping(value = "/summary")
+	public ResponseEntity<?> docenteSummary(@NonNull @RequestHeader("Authorization") String authorization){
+		String token = authorization.substring(7);
+		String email = jwtService.extractUsername(token);
+		DocenteDTO docente = docenteService.findDtoByEmail(email); //404
+		return ResponseEntity.status(HttpStatus.FOUND).body(docente);
+	}
+	
+	@GetMapping(value = "/classe/{classeId}")
+	public ResponseEntity<?> docenteGetClasse(@NonNull @RequestHeader("Authorization") String authorization, 
+			@PathVariable("classeId") Long classeId){
+		String token = authorization.substring(7);		
+		// risale al docente dal token
+		String email = jwtService.extractUsername(token); 
+		Docente docente = docenteService.findByEmail(email); //404		
+		
+		Classe classe = classeService.findById(classeId); //404
+		if (!docente.getClassi().contains(classe)) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(ApiResponse.unauthorized("Questo docente non è autorizzato a visualizzare la classe "+classe.getNome(),
+							docenteService.docenteToDto(docente) ));
+		}
+		 return ResponseEntity.ok(classeService.classeToDtoFull(classe));
+	}
 
 	@PostMapping(value = "/inserimento-voto")
-	public ResponseEntity<?> assegnaVoto(@RequestHeader("Authorization") String authorization,
+	public ResponseEntity<?> assegnaVoto(@NonNull @RequestHeader("Authorization") String authorization,
 			@RequestBody @NonNull @Valid VotoRequest request) {
 		
 		//Risaliamo a chi sta facendo la richiesta attraverso il token di autorizzazione
@@ -67,7 +101,7 @@ public class DocenteController {
 		VotoDTO newVoto;
 		try {
 			newVoto = votoService.salvaVoto(voto);
-		} catch (Exception e) {
+		} catch (DataAccessException e) {
 			log.error("Eccezione al salvataggio voto", e);
 			return ResponseEntity.internalServerError().body("Si è verificato un errore, impossibile salvare il voto");
 		}
@@ -100,7 +134,7 @@ public class DocenteController {
 	}
 
 	@DeleteMapping(value = "/delete-voto/{id}")
-	public ResponseEntity<?> deleteVoto(@RequestHeader("Authorization") String authorization,
+	public ResponseEntity<?> deleteVoto(@NonNull @RequestHeader("Authorization") String authorization,
 			@PathVariable("id") Long id) {
 
 		Voto voto = votoService.findById(id); // 404 SE NON LO TROVA

@@ -1,8 +1,13 @@
 package com.ferraro.RegistroScolastico.exceptions;
 
-public class ClasseAlreadyExistsException extends RuntimeException{
+import com.ferraro.RegistroScolastico.dto.ClasseDTO;
+
+public class ClasseAlreadyExistsException extends CustomException{
 	
-	public ClasseAlreadyExistsException(String nomeClasse) {
-		super("Questa classe esiste già, impossible duplicarla ".concat(nomeClasse));
+	
+	
+	public ClasseAlreadyExistsException(Object object) {
+		super("Questa classe esiste già, impossible duplicarla", object);
+		
 	}
 }

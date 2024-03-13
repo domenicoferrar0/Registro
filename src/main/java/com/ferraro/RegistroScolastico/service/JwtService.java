@@ -6,6 +6,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+
 import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Service
+@Slf4j
 public class JwtService {
 	
 	private final static String SECRET_KEY = "b0abc1q8xk38n6g4l9g5y20mm5ez9tkguat9pv7szu9ed97e2cbcb7a4e6548927c3";
@@ -27,13 +30,15 @@ public class JwtService {
 	}
 	
 	public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
+		log.info("CURRENT MILLIS {}",System.currentTimeMillis());
+		log.info("EXPIRE MILLIS {}",System.currentTimeMillis() + 10000 * 60 *480);
 		return Jwts
 				.builder()
 				.setClaims(claims)
 				.setSubject(userDetails.getUsername())
 				.claim("authorities", userDetails.getAuthorities())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 *48))
+				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 *480))
 				.signWith(getSigningKey(), SignatureAlgorithm.HS256)
 				.compact();
 	}

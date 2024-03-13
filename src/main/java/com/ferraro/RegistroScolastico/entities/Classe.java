@@ -1,10 +1,12 @@
 package com.ferraro.RegistroScolastico.entities;
 
+import java.util.Objects;
 import java.util.Set;
 
 import org.hibernate.validator.constraints.Range;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+
 public class Classe {
 	
 	@Id
@@ -37,6 +41,10 @@ public class Classe {
 	@Pattern(regexp = "^[A-Z]$", message = "La sezione è identificata da una singola lettera dell'alfabeto")
 	private String sezione;
 	
+	@Embedded
+	@NotNull
+	private Periodo periodo;
+	
 	@OneToMany(mappedBy = "classe")
 	private Set<Studente> studenti;
 	
@@ -46,4 +54,23 @@ public class Classe {
 	public String getNome() {
 		return getAnno()+getSezione();
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(anno, sezione);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Classe other = (Classe) obj;
+		return Objects.equals(anno, other.anno) && Objects.equals(sezione, other.sezione);
+	}
+	
+	
 }

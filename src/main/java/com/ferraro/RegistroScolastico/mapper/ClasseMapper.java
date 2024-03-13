@@ -1,15 +1,17 @@
 package com.ferraro.RegistroScolastico.mapper;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import com.ferraro.RegistroScolastico.dto.ClasseDTO;
+import com.ferraro.RegistroScolastico.dto.ClasseDTOFull;
 import com.ferraro.RegistroScolastico.entities.Classe;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {StudenteMapper.class, DocenteMapper.class})
 public interface ClasseMapper {
 	
 	ClasseMapper INSTANCE = Mappers.getMapper(ClasseMapper.class);
@@ -18,6 +20,8 @@ public interface ClasseMapper {
 	
 	public Classe dtoToClasse(ClasseDTO classeDTO);
 	
+	public ClasseDTOFull classeToDtoFull(Classe classe);
+	
 	default List<ClasseDTO> classesToDto(List<Classe> classi){
 		return classi.stream().map(this::classeToDto).collect(Collectors.toList());
 	}
@@ -25,4 +29,8 @@ public interface ClasseMapper {
 	default List<Classe> dtosToClasses (List<ClasseDTO> classi){
 		return classi.stream().map(this::dtoToClasse).collect(Collectors.toList());
 	}
+	
+	/*default Set<ClasseDTOFull> classeToDtosFull(Set<Classe> classi){
+		return classi.stream().map(this::classeToDtoFull).collect(Collectors.toSet());
+	} */
 }
