@@ -1,6 +1,7 @@
 package com.ferraro.RegistroScolastico.mapper;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
@@ -21,7 +22,7 @@ public interface AssenzaMapper {
 	
 	public AssenzaDTO assenzaToDto(Assenza assenza);
 	
-	default List<AssenzaDTO> assenzeToDto(List<Assenza> assenze){
+	default List<AssenzaDTO> assenzeToDto(Set<Assenza> assenze){
 		return assenze.stream().map(this::assenzaToDto).collect(Collectors.toList());
 	}
 }

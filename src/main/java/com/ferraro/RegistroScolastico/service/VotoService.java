@@ -1,6 +1,7 @@
 package com.ferraro.RegistroScolastico.service;
 
 import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,24 +27,24 @@ public class VotoService {
 
 	@Autowired
 	private VotoRepository votoRepository;
-	
+
 	@Autowired
 	private DocenteMapper docenteMapper;
 
 	public List<VotoDTO> findAll() {
-		List<Voto> voti = votoRepository.findAll();
+		Set<Voto> voti = new HashSet<>(votoRepository.findAll());
 		return votoMapper.votiToDto(voti);
 	}
 
 	public Voto creaVoto(Docente docente, Studente studente, VotoRequest request) {
 		if (studente.getClasse() == null) {
-			
+
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
-			
+
 		}
 		Set<Docente> docentiClasse = studente.getClasse().getDocenti();
 		if (!docentiClasse.contains(docente)) {
-			
+
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
 		Voto voto = votoMapper.requestToVoto(request);
@@ -66,10 +67,18 @@ public class VotoService {
 	@Transactional
 	public boolean deleteVoto(Long id) {
 		try {
-			return votoRepository.removeById(id)>0;
+			return votoRepository.removeById(id) > 0;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	public VotoDTO aggiornaVoto(Voto voto, VotoRequest votoRequest, Studente studente) {
+		voto.setStudente(studente);
+		voto.setData(votoRequest.getData());
+		voto.setVoto(votoRequest.getVoto());
+		
+		return votoMapper.votoToDto(votoRepository.save(voto));
 	}
 }

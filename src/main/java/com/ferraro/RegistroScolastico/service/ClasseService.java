@@ -53,12 +53,12 @@ public class ClasseService {
 	 * classeMapper.classeToDtosFull(classi); }
 	 */
 
-	public ClasseDTOFull getClasseFull(Integer anno, String sezione) {
+/*	public ClasseDTOFull getClasseFull(Integer anno, String sezione) {
 		Classe classe = classeRepository.findByAnnoAndSezione(anno, sezione)
 				.orElseThrow(() -> new ClasseNotFoundException(anno + sezione));
 		return classeMapper.classeToDtoFull(classe);
 	}
-	
+	*/
 	public ClasseDTOFull classeToDtoFull(Classe classe) {
 		return classeMapper.classeToDtoFull(classe);
 	}

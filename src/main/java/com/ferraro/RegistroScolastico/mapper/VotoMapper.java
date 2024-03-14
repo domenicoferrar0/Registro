@@ -1,6 +1,7 @@
 package com.ferraro.RegistroScolastico.mapper;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
@@ -22,7 +23,7 @@ public interface VotoMapper {
 	
 	public VotoDTO votoToDto(Voto voto);
 	
-	public default List<VotoDTO> votiToDto(List<Voto> voti){
+	public default List<VotoDTO> votiToDto(Set<Voto> voti){
 		return voti.stream().map(this::votoToDto).collect(Collectors.toList());
 	}
 		

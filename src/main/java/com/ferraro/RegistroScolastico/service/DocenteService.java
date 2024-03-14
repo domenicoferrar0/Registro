@@ -1,5 +1,7 @@
 package com.ferraro.RegistroScolastico.service;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -7,23 +9,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.ferraro.RegistroScolastico.mapper.ClasseMapper;
 import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
 import com.ferraro.RegistroScolastico.mapper.VotoMapper;
 import com.ferraro.RegistroScolastico.repository.AnagraficaRepository;
+import com.ferraro.RegistroScolastico.repository.ClasseRepository;
 import com.ferraro.RegistroScolastico.repository.DocenteRepository;
 import com.ferraro.RegistroScolastico.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
+import com.ferraro.RegistroScolastico.dto.ClasseDTO;
 import com.ferraro.RegistroScolastico.dto.DocenteDTO;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
+import com.ferraro.RegistroScolastico.entities.Periodo;
 import com.ferraro.RegistroScolastico.exceptions.ClassAssignException;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
 import com.ferraro.RegistroScolastico.exceptions.PersonNotFoundException;
 
 @Service
+@Slf4j
 public class DocenteService {
 
 	@Autowired
@@ -31,7 +39,13 @@ public class DocenteService {
 
 	@Autowired
 	private DocenteMapper docenteMapper;
-
+	
+	@Autowired
+	private ClasseMapper classeMapper;
+	
+	@Autowired
+	private ClasseRepository classeRepository;
+	
 	@Autowired
 	private AnagraficaRepository anagraficaRepository;
 
@@ -86,6 +100,15 @@ public class DocenteService {
 	public DocenteDTO findDtoByEmail(String email) {
 
 		return docenteMapper.docenteToDto(findByEmail(email));
+	}
+	
+	public List<ClasseDTO> getClassiByPeriodo(Periodo periodo, Docente docente){
+		List<Classe> classi = classeRepository.findByDocenteAndPeriodo(docente, periodo);
+	//	classi.sort(Comparator.comparing(Classe::getSezione));
+	//	classi.sort(Comparator.comparing(Classe::getAnno));;
+				
+		log.info("check classe {}", classi.isEmpty());
+		return classeMapper.classesToDto(classi);
 	}
 
 }

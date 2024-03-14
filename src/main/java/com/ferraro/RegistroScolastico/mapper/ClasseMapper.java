@@ -25,6 +25,10 @@ public interface ClasseMapper {
 	default List<ClasseDTO> classesToDto(List<Classe> classi){
 		return classi.stream().map(this::classeToDto).collect(Collectors.toList());
 	}
+/*	
+	default List<ClasseDTO> classesToDto(Set<Classe> classi){
+		return classi.stream().map(this::classeToDto).collect(Collectors.toList());
+	} */
 	
 	default List<Classe> dtosToClasses (List<ClasseDTO> classi){
 		return classi.stream().map(this::dtoToClasse).collect(Collectors.toList());
