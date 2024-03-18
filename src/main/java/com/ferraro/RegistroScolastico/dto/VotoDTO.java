@@ -18,4 +18,5 @@ public class VotoDTO {
 	private DocenteDTOSimple docente;
 
 	private Double voto;
+	
 }

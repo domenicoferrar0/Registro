@@ -16,4 +16,18 @@ public class PagineController {
 		return "studente-homepage";
 	}
 	
+	@GetMapping("/studente/voti")
+	public String showVotiStudente() {
+		return "studente-voti";
+	}
+	
+	@GetMapping("/studente/assenze")
+	public String showAssenzeStudente() {
+		return "studente-assenze";
+	}
+	@GetMapping("/home/registrazione-studente")
+	public String showFormStudente() {
+		return "studente-registration";
+	}
+	
 }

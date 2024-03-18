@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="axios-config.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+
 <title>Login Form</title>
 <style>
     body {
@@ -76,13 +80,28 @@
     <button type="submit">Login</button>
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <script>
-function handleSuccess(token) {
-    // Display success message
-    alert('Login successful');
-   localStorage.setItem('jwt', token);
-    // Redirect to another page or perform other actions as needed
+function handleSuccess(response) {
+    const token = response.data.jwt;
+    const redirect = response.data.redirect;
+    localStorage.setItem('jwt', token);
+    
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
+    
+    axios.get(redirect, { headers: headers })
+        .then(() => {
+            // Redirect successful, handle accordingly
+            alert(token);
+            window.location.href = redirect;
+        })
+        .catch(error => {
+            // Handle errors during redirection
+            alert('errore');
+            console.error('Error during redirection:', error);
+        });
 }
 
 function handleError(errorMessage) {
@@ -107,8 +126,8 @@ document.getElementById("loginForm").addEventListener("submit", function(event) 
     })
     .then(response => {
         if (response.status === 200) {
-        const token = response.data;
-            handleSuccess(token); // Display success message and store token in cookies
+        
+            handleSuccess(response); // Display success message and store token in cookies
         } else if (response.status === 401 || response.status === 404) {
             return response.data;
         } else {

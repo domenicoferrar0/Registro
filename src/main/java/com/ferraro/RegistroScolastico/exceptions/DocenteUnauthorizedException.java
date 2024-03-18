@@ -2,6 +2,7 @@ package com.ferraro.RegistroScolastico.exceptions;
 
 import com.ferraro.RegistroScolastico.dto.DocenteDTOSimple;
 
+
 public class DocenteUnauthorizedException extends RuntimeException {
 	
 	private DocenteDTOSimple docente;

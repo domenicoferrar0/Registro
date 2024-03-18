@@ -26,6 +26,8 @@ public interface VotoMapper {
 	public default List<VotoDTO> votiToDto(Set<Voto> voti){
 		return voti.stream().map(this::votoToDto).collect(Collectors.toList());
 	}
+	
+	
 		
 		
 	public Voto requestToVoto(VotoRequest request);

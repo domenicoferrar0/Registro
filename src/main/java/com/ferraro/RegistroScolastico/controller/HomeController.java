@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ferraro.RegistroScolastico.dto.DocenteDTO;
 import com.ferraro.RegistroScolastico.dto.LoginDTO;
+import com.ferraro.RegistroScolastico.dto.LoginResponse;
 import com.ferraro.RegistroScolastico.dto.StudenteDTO;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Docente;
@@ -81,8 +82,9 @@ public class HomeController {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email o password non validi");
 		}
-
-		return ResponseEntity.ok(jwtService.generateToken(user));
+		String jwt = jwtService.generateToken(user);
+		log.info("JWT {}", jwt);
+		return ResponseEntity.ok(LoginResponse.login(jwt, user.getAuthorities()));
 	}
 
 	@PostMapping(value = "/signin-studente")

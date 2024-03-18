@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class JwtService {
 	
 	private final static String SECRET_KEY = "b0abc1q8xk38n6g4l9g5y20mm5ez9tkguat9pv7szu9ed97e2cbcb7a4e6548927c3";
+	private final static Long expiration = 1000L * 60L * 60L * 720L;
 	
 	private Key getSigningKey() {
 		byte[] key = Decoders.BASE64.decode(SECRET_KEY);
@@ -31,14 +32,14 @@ public class JwtService {
 	
 	public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
 		log.info("CURRENT MILLIS {}",System.currentTimeMillis());
-		log.info("EXPIRE MILLIS {}",System.currentTimeMillis() + 10000 * 60 *480);
+		log.info("EXPIRE MILLIS {}",System.currentTimeMillis() + expiration);
 		return Jwts
 				.builder()
 				.setClaims(claims)
 				.setSubject(userDetails.getUsername())
 				.claim("authorities", userDetails.getAuthorities())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 *480))
+				.setExpiration(new Date(System.currentTimeMillis() + expiration))
 				.signWith(getSigningKey(), SignatureAlgorithm.HS256)
 				.compact();
 	}

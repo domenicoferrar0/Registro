@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Student Registration Form</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f0f0f0;
+			margin: 0;
+			padding: 20px;
+		}
+
+		h1 {
+			text-align: center;
+			font-size: 1.5em;
+			color: #333;
+		}
+
+		form {
+			max-width: 400px;
+			margin: 0 auto;
+			background-color: #fff;
+			padding: 20px;
+			border-radius: 15px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+
+		label {
+			display: block;
+			margin-bottom: 5px;
+			font-size: 0.9em;
+			color: #555;
+		}
+
+		input[type="text"],
+		input[type="date"],
+		input[type="email"],
+		select {
+			width: 100%;
+			padding: 10px;
+			margin-bottom: 10px;
+			border: 1px solid #ccc;
+			border-radius: 15px;
+			box-sizing: border-box;
+		}
+
+		.field-container {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.field-container>div {
+			width: 48%;
+		}
+
+		.error-message {
+			color: red;
+			font-size: 0.8em;
+			display: block;
+			height: 20px;
+		}
+
+		.confirmation-message {
+			color: green;
+			font-size: 1em;
+			font-weight: bold;
+			margin-bottom: 15px;
+		}
+
+		button {
+			width: 100%;
+			margin-top: 20px;
+			background-color: #4caf50;
+			color: white;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 15px;
+			cursor: pointer;
+			font-size: 1em;
+		}
+
+		button:hover {
+			background-color: #45a049;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>Student Registration Form</h1>
+	<form id="studentForm">
+		<div class="field-container">
+			<div>
+				<label for="nome">Nome:</label>
+				<input type="text" id="nome" name="nome" required>
+				<span id="nomeError" class="error-message"></span>
+			</div>
+			<div>
+				<label for="cognome">Cognome:</label>
+				<input type="text" id="cognome" name="cognome" required>
+				<span id="cognomeError" class="error-message"></span>
+			</div>
+		</div>
+		<label for="nascita">Data di nascita:</label>
+		<input type="date" id="nascita" name="nascita" required>
+		<span id="nascitaError" class="error-message"></span>
+		<label for="cf">Codice Fiscale:</label>
+		<input type="text" id="cf" name="cf" required>
+		<span id="cfError" class="error-message"></span>
+		<label for="indirizzo">Indirizzo:</label>
+		<input type="text" id="indirizzo" name="indirizzo" required>
+		<div class="field-container">
+			<div>
+				<label for="genere">Genere:</label>
+				<select id="genere" name="genere" required>
+					<option disabled="disabled" selected value=" ">Seleziona il tuo genere</option>
+					<option th:each="genere : ${T(com.ferraro.RegistroScolastico.enums.Genere).values()}"
+						th:value="${genere}" th:text="${genere.nome}">
+					</option>
+				</select>
+			</div>
+			<div>
+				<label for="luogoDiNascita">Provincia di nascita:</label>
+				<select id="luogoDiNascita" name="luogoDiNascita" required>
+					<option disabled="disabled" selected value=" ">Seleziona luogo di nascita</option>
+					<option th:each="luogo : ${T(com.ferraro.RegistroScolastico.enums.Provincia).values()}"
+						th:value="${luogo}" th:text="${luogo.fullName}">
+					</option>
+				</select>
+			</div>
+		</div>
+		<label for="email">Email:</label>
+		<input type="email" id="email" name="email" required>
+		<span id="emailError" class="error-message"></span>
+		<button type="submit">Submit</button>
+		<span id="conflictError" class="error-message"></span>
+		<p class="confirmation-message" style="display: none;"></p>
+	</form>
+
+	<script>
+		$(document).ready(function () {
+    $('#studentForm').on('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const json = {};
+
+        formData.forEach((value, key) => {
+            json[key] = value;
+        });
+
+        clearMessages();
+
+        $.ajax({
+            type: 'POST',
+            url: '/rest/api/v0/home/signin-studente',
+            contentType: 'application/json', // Specify content type
+            data: JSON.stringify(json), // Convert json object to JSON string
+            success: function (response) {
+                console.log(response);
+                displayConfirmationMessage('Studente registrato correttamente');
+                
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr);
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON;
+                    for (const field in errors) {
+                        const errorMessage = errors[field];
+                        displayErrorMessage(field, errorMessage);
+                    }
+                }
+                if (xhr.status === 409) {
+                    const conflictMessage = xhr.responseJSON.message;
+                    $('#conflictError').text(conflictMessage);
+                }
+            }
+        });
+    });
+
+    function clearMessages() {
+        $('.error-message').text('');
+        $('.confirmation-message').hide(); // Hide confirmation message
+    }
+
+    function displayConfirmationMessage(message) {
+        $('#conflictError').text('');
+        $('.confirmation-message').text(message).show(); // Show confirmation message
+    }
+
+    function displayErrorMessage(field, errorMessage) {
+            const errorElement = document.getElementById(`${field}Error`);
+            if (errorElement) {
+                errorElement.textContent = errorMessage;
+            }
+        }
+});
+
+	</script>
+</body>
+
+</html>

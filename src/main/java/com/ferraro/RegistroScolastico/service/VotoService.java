@@ -1,9 +1,14 @@
 package com.ferraro.RegistroScolastico.service;
 
 import java.util.Set;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.ferraro.RegistroScolastico.dto.VotoDTO;
@@ -80,5 +85,25 @@ public class VotoService {
 		voto.setVoto(votoRequest.getVoto());
 		
 		return votoMapper.votoToDto(votoRepository.save(voto));
+	}
+	
+	public Page<VotoDTO> getVotiStudente(Studente studente, int page, int size, String searchTerm) {
+		List<VotoDTO> votiTot;
+		if (searchTerm == null || searchTerm.isBlank()) {
+			votiTot = votoMapper.votiToDto(studente.getVoti());
+		} else {
+			Set<Voto> votiQuery = votoRepository.searchByStudente(searchTerm, studente);
+			votiTot = votoMapper.votiToDto(votiQuery);
+
+		}
+		votiTot.sort(Comparator.comparing(VotoDTO::getData).reversed());
+
+		Pageable pageRequest = PageRequest.of(page, size);
+		int start = (int) pageRequest.getOffset();
+		int end = Math.min((start + pageRequest.getPageSize()), votiTot.size());
+
+		List<VotoDTO> sublist = votiTot.subList(start, end);
+
+		return new PageImpl<>(sublist, pageRequest, votiTot.size());
 	}
 }
