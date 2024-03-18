@@ -1,8 +1,10 @@
 package com.ferraro.RegistroScolastico.exceptions;
 
+import com.ferraro.RegistroScolastico.dto.RegistrationForm;
+
 public class DuplicateRegistrationException extends CustomException{
 
-	public DuplicateRegistrationException(Object object) {
-		super("Attenzione, utente già registrato, controlla Codice Fiscale ed email", object);
+	public DuplicateRegistrationException(RegistrationForm form) {
+		super("Attenzione, utente già registrato, controlla Codice Fiscale ed email", form);
 	}
 }

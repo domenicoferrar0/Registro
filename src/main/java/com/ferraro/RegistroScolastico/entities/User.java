@@ -2,6 +2,7 @@ package com.ferraro.RegistroScolastico.entities;
 
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,8 +36,11 @@ public class User {
 			+ "deve contenere almeno 8 caratteri, una maiuscola ed un simbolo speciale")
 	private String password;
 	
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
 	private Set<Role> roles;
+	
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+	private boolean isEnabled;
 	
 	
 }

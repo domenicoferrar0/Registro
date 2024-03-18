@@ -3,11 +3,13 @@ package com.ferraro.RegistroScolastico.entities;
 import java.util.Objects;
 import java.util.Set;
 
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.constraints.Range;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -45,10 +47,10 @@ public class Classe {
 	@NotNull
 	private Periodo periodo;
 	
-	@OneToMany(mappedBy = "classe")
+	@OneToMany(mappedBy = "classe", fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.PERSIST)
 	private Set<Studente> studenti;
 	
-	@ManyToMany(mappedBy = "classi")
+	@ManyToMany(mappedBy = "classi", fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.PERSIST)
 	private Set<Docente> docenti;
 	
 	public String getNome() {

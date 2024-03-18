@@ -43,14 +43,14 @@ public class Docente {
 	@JoinColumn(name = "user_id", nullable = false, unique = true)
 	private User user;
 	
-	@OneToMany(mappedBy = "docente")
+	@OneToMany(mappedBy = "docente", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private Set<Voto> voti;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Materia materia;
 	
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinTable(name = "docenti_classi",
 	joinColumns = @JoinColumn(name = "docente_id"),
 	inverseJoinColumns = @JoinColumn(name = "classe_id"))

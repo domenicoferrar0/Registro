@@ -14,6 +14,7 @@ import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
 import com.ferraro.RegistroScolastico.mapper.VotoMapper;
 import com.ferraro.RegistroScolastico.repository.AnagraficaRepository;
 import com.ferraro.RegistroScolastico.repository.ClasseRepository;
+import com.ferraro.RegistroScolastico.repository.ConfirmationTokenRepository;
 import com.ferraro.RegistroScolastico.repository.DocenteRepository;
 import com.ferraro.RegistroScolastico.repository.UserRepository;
 
@@ -24,6 +25,7 @@ import com.ferraro.RegistroScolastico.dto.ClasseDTO;
 import com.ferraro.RegistroScolastico.dto.DocenteDTO;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Classe;
+import com.ferraro.RegistroScolastico.entities.ConfirmationToken;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Periodo;
 import com.ferraro.RegistroScolastico.exceptions.ClassAssignException;
@@ -51,6 +53,9 @@ public class DocenteService {
 
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private ConfirmationTokenRepository confirmationRepository;
 
 	public DocenteDTO docenteToDto(Docente docente) {
 		return docenteMapper.docenteToDto(docente);
@@ -69,8 +74,7 @@ public class DocenteService {
 	}
 
 	@Transactional
-	public DocenteDTO saveDocente(Docente docente) {
-
+	public DocenteDTO saveDocente(Docente docente) {		
 		Docente nuovoDocente = docenteRepository.save(docente);
 		return docenteMapper.docenteToDto(nuovoDocente);
 	}

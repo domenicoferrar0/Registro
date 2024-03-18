@@ -39,13 +39,13 @@ public class Studente {
 	@JoinColumn(name = "user_id", nullable = false, unique = true)
 	private User user;
 	
-	@OneToMany(mappedBy = "studente")
+	@OneToMany(mappedBy = "studente", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private Set<Voto> voti;
 	
-	@OneToMany(mappedBy = "studente")
+	@OneToMany(mappedBy = "studente", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	private Set<Assenza> assenze;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "classe_id", nullable = true)
 	private Classe classe;
 }

@@ -30,4 +30,9 @@ public class PagineController {
 		return "studente-registration";
 	}
 	
+	@GetMapping("/home/confirm")
+	public String showMailConfirmation() {
+		return "mail-confirmation";
+	}
+	
 }

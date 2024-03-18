@@ -6,8 +6,8 @@ public class ClasseAlreadyExistsException extends CustomException{
 	
 	
 	
-	public ClasseAlreadyExistsException(Object object) {
-		super("Questa classe esiste già, impossible duplicarla", object);
+	public ClasseAlreadyExistsException(ClasseDTO classe) {
+		super("Questa classe esiste già, impossible duplicarla", classe);
 		
 	}
 }

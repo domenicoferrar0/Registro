@@ -37,15 +37,15 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler({ RoleNotFoundException.class, UsernameNotFoundException.class, PersonNotFoundException.class,
-			ClasseNotFoundException.class, ResourceNotFoundException.class })
+			ClasseNotFoundException.class, ResourceNotFoundException.class, ConfirmationTokenNotFoundException.class })
 	public ResponseEntity<String> handleNotFoundException(Exception ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
 
 	
-	@ExceptionHandler(DocenteUnauthorizedException.class)
-	public ResponseEntity<ApiResponse> docenteUnauthorizedException(DocenteUnauthorizedException ex){
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.unauthorized(ex.getMessage(), ex.getDocente()));
+	@ExceptionHandler({DocenteUnauthorizedException.class, UserNotEnabledException.class})
+	public ResponseEntity<ApiResponse> unauthorizedException(CustomException ex){
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.unauthorized(ex.getMessage(), ex.getObject()));
 	}
 	
 	@ExceptionHandler(ExpiredJwtException.class)

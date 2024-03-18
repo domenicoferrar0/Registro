@@ -22,6 +22,7 @@ import com.ferraro.RegistroScolastico.dto.ClasseDTOFull;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Assenza;
 import com.ferraro.RegistroScolastico.entities.Classe;
+import com.ferraro.RegistroScolastico.entities.ConfirmationToken;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.entities.Voto;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
@@ -35,6 +36,7 @@ import com.ferraro.RegistroScolastico.mapper.StudenteMapper;
 import com.ferraro.RegistroScolastico.mapper.VotoMapper;
 import com.ferraro.RegistroScolastico.repository.AnagraficaRepository;
 import com.ferraro.RegistroScolastico.repository.AssenzaRepository;
+import com.ferraro.RegistroScolastico.repository.ConfirmationTokenRepository;
 import com.ferraro.RegistroScolastico.repository.StudenteRepository;
 import com.ferraro.RegistroScolastico.repository.UserRepository;
 import com.ferraro.RegistroScolastico.repository.VotoRepository;
@@ -54,14 +56,13 @@ public class StudenteService {
 	private AnagraficaRepository anagraficaRepository;
 
 	@Autowired
-	private UserRepository userRepository;	
+	private UserRepository userRepository;
 
 	@Autowired
 	private ClasseMapper classeMapper;
 
-	
-
-	
+	@Autowired
+	private ConfirmationTokenRepository confirmationRepository;
 
 	public List<StudenteDTO> findAll() {
 		return studenteMapper.studentiToDto(studenteRepository.findAll());
@@ -77,6 +78,7 @@ public class StudenteService {
 	@Transactional
 	public StudenteDTO saveStudente(Studente studente) {
 		Studente nuovoStudente = studenteRepository.save(studente);
+
 		return studenteMapper.studenteToDto(nuovoStudente);
 	}
 
@@ -116,9 +118,5 @@ public class StudenteService {
 		}
 		return classeMapper.classeToDtoFull(classe);
 	}
-
-	
-
-	
 
 }
