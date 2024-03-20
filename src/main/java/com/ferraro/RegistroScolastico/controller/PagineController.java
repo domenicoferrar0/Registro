@@ -25,6 +25,11 @@ public class PagineController {
 	public String showAssenzeStudente() {
 		return "studente-assenze";
 	}
+	
+	@GetMapping("/studente/classe")
+	public String showClasseStudente() {
+		return "studente-classe";
+	}
 	@GetMapping("/home/registrazione-studente")
 	public String showFormStudente() {
 		return "studente-registration";

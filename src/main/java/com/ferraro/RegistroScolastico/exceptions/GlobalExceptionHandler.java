@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.catalina.connector.Response;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,9 +14,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.ferraro.RegistroScolastico.dto.ApiResponse;
-import com.ferraro.RegistroScolastico.dto.StudenteDTO;
-
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -51,5 +50,24 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(ExpiredJwtException.class)
 	public ResponseEntity<String> handleJwtExpiring(ExpiredJwtException ex){
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("autorizzazione scaduta rieffettua il login");
+	}
+	
+	
+	
+	@ExceptionHandler(MailNotSentException.class)
+	public ResponseEntity<String> handleMailException(MailNotSentException ex){
+		ex.printStackTrace();
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+	}
+	
+	@ExceptionHandler(DataAccessException.class)
+	public ResponseEntity<String> handleDbException(DataAccessException ex){
+		ex.printStackTrace();
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+	}
+	
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<String> handleConstraintException(ConstraintViolationException ex){
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
 }

@@ -3,7 +3,6 @@ package com.ferraro.RegistroScolastico.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -45,10 +44,10 @@ public class AdminController {
 
 	@Autowired
 	private DocenteService docenteService;
-	
+
 	@Autowired
 	private VotoService votoService;
-	
+
 	@Autowired
 	private AssenzaService assenzaService;
 
@@ -67,28 +66,22 @@ public class AdminController {
 	public ResponseEntity<List<ClasseDTO>> getClasses() {
 		return ResponseEntity.ok(classeService.findAll());
 	}
-	
+
 	@GetMapping(value = "/get-voti")
-	public ResponseEntity<List<VotoDTO>> getVoti(){
+	public ResponseEntity<List<VotoDTO>> getVoti() {
 		return ResponseEntity.ok(votoService.findAll());
 	}
-	
+
 	@GetMapping(value = "/get-assenze")
-	public ResponseEntity<List<AssenzaDTO>> getAssenze(){
+	public ResponseEntity<List<AssenzaDTO>> getAssenze() {
 		return ResponseEntity.ok(assenzaService.findAll());
 	}
 
 	@PostMapping(value = "/save-classe")
 	public ResponseEntity<?> saveClasse(@RequestBody @NonNull @Valid ClasseDTO classeDTO) {
 
-		ClasseDTO newClasse;
-		try {
-			newClasse = classeService.saveClasse(classeDTO); // Controlla prima se esiste già
-		} catch (DataAccessException e) {
-			log.error("exception Salvataggio classe", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Si è verificato un errore nel server, prova più tardi");
-		}
+		ClasseDTO newClasse = classeService.saveClasse(classeDTO); // Controlla prima se esiste già
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(newClasse);
 	}
 
@@ -99,14 +92,10 @@ public class AdminController {
 			@RequestParam(value = "studenteCF", required = true) String cf) {
 		Studente studente = studenteService.findByCf(cf); // 404
 		Classe classe = classeService.findById(id); // 404
-		StudenteDTO studenteAggiornato;
-		try { // Controlla se lo studente non ha già una classe, exception gestita
-			studenteAggiornato = studenteService.assignClasse(studente, classe);
-		} catch (DataAccessException e) {
-			log.error("exception assegnazione classe studente", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Si è verificato un errore nel server, riprova più tardi");
-		}
+
+		// Controlla se lo studente non ha già una classe, exception gestita
+		StudenteDTO studenteAggiornato = studenteService.assignClasse(studente, classe);
+
 		return ResponseEntity.ok().body(studenteAggiornato);
 	}
 
@@ -116,17 +105,12 @@ public class AdminController {
 		Docente docente = docenteService.findByCf(cf);
 		Classe classe = classeService.findById(id);
 		DocenteDTO docenteAggiornato;
+		
 		// Funziona solo se quella materia non è già occupata o se quel docente non è
 		// già presente nella classe
-		try {
-			docenteAggiornato = docenteService.assignClasse(docente, classe);
-		}
 
-		catch (DataAccessException e) {
-			log.error("Exception assegnazione classe docente", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Si è verificato un errore nel server riprova più tardi");
-		}
+		docenteAggiornato = docenteService.assignClasse(docente, classe);
+
 		return ResponseEntity.ok().body(docenteAggiornato);
 	}
 

@@ -3,7 +3,6 @@ package com.ferraro.RegistroScolastico.entities;
 import java.util.Objects;
 import java.util.Set;
 
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.constraints.Range;
 
 import jakarta.persistence.Column;

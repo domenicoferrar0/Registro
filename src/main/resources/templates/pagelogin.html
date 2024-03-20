@@ -128,17 +128,19 @@ document.getElementById("loginForm").addEventListener("submit", function(event) 
         if (response.status === 200) {
         
             handleSuccess(response); // Display success message and store token in cookies
-        } else if (response.status === 401 || response.status === 404) {
-            return response.data;
-        } else {
-            throw new Error('There was a problem.');
-        }
+        } 
     })
-    .catch(error => {
-        // Handle errors
-        console.error('Error:', error);
-        handleError(error.response.data || 'Unknown error occurred.');
-    });
+    .catch( error => {
+		var errorMessage;
+		if(error.response.status == 404){
+		 errorMessage = error.response.data;
+	}
+    else if(error.response.status == 401){
+		errorMessage = error.response.data.message+" "+error.response.data.object;
+	}
+		handleError(errorMessage);
+	
+   });
 });
 </script>
 

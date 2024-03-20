@@ -42,6 +42,7 @@ public interface StudenteMapper {
 	@Mapping(source = "anagrafica.nome", target = "nome")
 	@Mapping(source = "anagrafica.cognome", target = "cognome")
 	@Mapping(source = "anagrafica.cf", target = "cf")
+	@Mapping(source = "anagrafica.nascita", target = "nascita")
 	public StudenteDTOSimple studenteToDtoSimple(Studente studente);
 	
 		

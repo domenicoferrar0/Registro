@@ -1,5 +1,9 @@
 package com.ferraro.RegistroScolastico.dto;
 
+import com.ferraro.RegistroScolastico.enums.Materia;
+
+import java.time.LocalDate;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +20,10 @@ public class StudenteDTOSimple {
 	private String cognome;
 	
 	private String cf;
+	
+	private LocalDate nascita;
+	
+	private Materia materia;
 	
 	
 }

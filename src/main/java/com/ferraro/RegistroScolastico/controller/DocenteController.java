@@ -3,7 +3,6 @@ package com.ferraro.RegistroScolastico.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -88,9 +87,10 @@ public class DocenteController {
 		}
 		return ResponseEntity.ok(classeService.classeToDtoFull(classe));
 	}
-	
+
 	@GetMapping("/classi")
-	public ResponseEntity<?> docenteGetClassi(@NonNull @RequestHeader("Authorization") String authorization, @NonNull @Valid @RequestBody Periodo periodo){
+	public ResponseEntity<?> docenteGetClassi(@NonNull @RequestHeader("Authorization") String authorization,
+			@NonNull @Valid @RequestBody Periodo periodo) {
 		String token = authorization.substring(7);
 		// risale al docente dal token
 		log.info("check periodo {}", periodo.getStartYear());
@@ -117,13 +117,9 @@ public class DocenteController {
 		// Exception gestita se lo studente non ha classe o se il docente non è un suo
 		// docente
 		Voto voto = votoService.creaVoto(docente, studente, request);
-		VotoDTO newVoto;
-		try {
-			newVoto = votoService.salvaVoto(voto);
-		} catch (DataAccessException e) {
-			log.error("Eccezione al salvataggio voto", e);
-			return ResponseEntity.internalServerError().body("Si è verificato un errore, impossibile salvare il voto");
-		}
+
+		VotoDTO newVoto = votoService.salvaVoto(voto);
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(newVoto);
 
 	}
@@ -143,10 +139,6 @@ public class DocenteController {
 		} catch (IllegalArgumentException e) {
 
 			return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-		} catch (Exception e) {
-			log.error("Eccezione generica salvataggio assenza ", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Si è verificato un errore, riprova più tardi");
 		}
 		return ResponseEntity.status(HttpStatus.CREATED).body(nuovaAssenza);
 
@@ -206,14 +198,9 @@ public class DocenteController {
 					.body("Spiacente, solo il docente che ha inserito il voto può modificarlo");
 		}
 		Studente studente = studenteService.findByCf(votoRequest.getStudenteCF()); // 404 checked
-		VotoDTO votoAggiornato;
-		try {
-			votoAggiornato = votoService.aggiornaVoto(voto, votoRequest, studente);
 
-		} catch (DataAccessException e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Non è stato possibile aggiornare questo voto");
-		}
+		VotoDTO votoAggiornato = votoService.aggiornaVoto(voto, votoRequest, studente);
+
 		return ResponseEntity.ok(votoAggiornato);
 	}
 
@@ -221,12 +208,9 @@ public class DocenteController {
 	public ResponseEntity<?> updateAssenza(@PathVariable("id") Long id,
 			@NonNull @Valid @RequestBody AssenzaRequest assenzaRequest) {
 		Studente studente = studenteService.findByCf(assenzaRequest.getStudenteCF());
-		AssenzaDTO assenzaAggiornata;
-		try {
-			assenzaAggiornata = assenzaService.aggiornaAssenza(id, assenzaRequest, studente);
-		} catch (DataAccessException ex) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Non è stato possibile aggiornare questa assenza");
-		}
+
+		AssenzaDTO assenzaAggiornata = assenzaService.aggiornaAssenza(id, assenzaRequest, studente);
+
 		return ResponseEntity.ok(assenzaAggiornata);
 	}
 }

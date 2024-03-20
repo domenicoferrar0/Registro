@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.ferraro.RegistroScolastico.controller.StudenteController;
 import com.ferraro.RegistroScolastico.dto.AssenzaDTO;
 import com.ferraro.RegistroScolastico.dto.AssenzaRequest;
 import com.ferraro.RegistroScolastico.entities.Assenza;
@@ -23,7 +22,6 @@ import com.ferraro.RegistroScolastico.mapper.AssenzaMapper;
 import com.ferraro.RegistroScolastico.repository.AssenzaRepository;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @Service

@@ -1,6 +1,7 @@
 package com.ferraro.RegistroScolastico.controller;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +28,7 @@ import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Role;
 import com.ferraro.RegistroScolastico.entities.Studente;
+import com.ferraro.RegistroScolastico.entities.User;
 import com.ferraro.RegistroScolastico.service.DocenteService;
 import com.ferraro.RegistroScolastico.service.JwtService;
 import com.ferraro.RegistroScolastico.service.MailService;
@@ -35,6 +36,7 @@ import com.ferraro.RegistroScolastico.service.MyUserDetails;
 import com.ferraro.RegistroScolastico.service.RoleService;
 import com.ferraro.RegistroScolastico.service.StudenteService;
 
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,8 +68,6 @@ public class HomeController {
 
 	@Autowired
 	private DocenteService docenteService;
-	
-	
 
 	@PostMapping(value = "/login")
 	public ResponseEntity<?> login(@RequestBody @NonNull LoginDTO loginDTO) {
@@ -91,7 +91,8 @@ public class HomeController {
 	}
 
 	@PostMapping(value = "/signin-studente")
-	public ResponseEntity<?> saveStudente(@RequestBody @NonNull @Valid RegistrationForm form) {
+	public ResponseEntity<?> saveStudente(@RequestBody @NonNull @Valid RegistrationForm form)
+			throws MessagingException {
 		log.info("inside the api");
 		String plainPassword = userService.generatePassword();
 		// IL MAPPER HA CONTROLLI SULLE UNIQUE KEY
@@ -106,28 +107,18 @@ public class HomeController {
 		String encodedPassword = encoder.encode(plainPassword);
 		// Aggiornando la password con quella cryptata
 		studente.getUser().setPassword(encodedPassword);
-		StudenteDTO nuovoStudente;
-		try {
-			nuovoStudente = studenteService.saveStudente(studente);
-			String token = userService.createToken(studente.getUser());
-			mailService.sendRegistrationEmail(form, plainPassword, token);
-		} catch (Exception e) {
-			log.error("Exception inside signin studente endpoint {}", studente, e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Si è verificato un errore nel server, riprova più tardi");
-		}
-
+		StudenteDTO nuovoStudente = studenteService.saveStudente(studente, form, plainPassword);
 		return ResponseEntity.status(HttpStatus.CREATED).body(nuovoStudente);
 	}
 
 	@PostMapping(value = "/signin-docente")
 	public ResponseEntity<?> saveDocente(@RequestBody @NonNull @Valid RegistrationForm form) {
 		log.info("inside the api");
-		
-		if(form.getMateria() == null) {
+
+		if (form.getMateria() == null) {
 			return ResponseEntity.unprocessableEntity().body("Inserisci una materia valida");
 		}
-		
+
 		String plainPassword = userService.generatePassword();
 		// IL MAPPER HA CONTROLLI SULLE UNIQUE KEY
 		Docente docente = docenteService.formToDocente(form);
@@ -141,30 +132,26 @@ public class HomeController {
 		String encodedPassword = encoder.encode(plainPassword);
 		// Aggiornando la password con quella cryptata
 		docente.getUser().setPassword(encodedPassword);
-		DocenteDTO nuovoDocente;
-		try {
-			nuovoDocente = docenteService.saveDocente(docente);
-			String token = userService.createToken(docente.getUser());
-			mailService.sendRegistrationEmail(form, plainPassword, token);
-		} catch (Exception e) {
-			log.error("Exception inside signin docente endpoint {}", docente, e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Si è verificato un errore nel server, riprova più tardi");
-		}
+		DocenteDTO nuovoDocente = docenteService.saveDocente(docente, form, plainPassword);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(nuovoDocente);
 	}
-	
+
 	@PutMapping("/confirm-email")
-	public ResponseEntity<String> confirmEmail(@RequestParam(value = "token", required = true) String token){
+	public ResponseEntity<String> confirmEmail(@RequestParam(value = "token", required = true) String token) {
 		log.info("INSIDE API CONFIRM TOKEN {}", token);
-		if(!userService.confirmEmail(token)) {
+		if (!mailService.confirmEmail(token)) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.body("Si è verificato un errore, non è stato possibile confermare la mail");
 		}
 		return ResponseEntity.ok("Congratulazione, la tua email è stata verificata");
 	}
 
-	
+	// DA TOGLIERE
+	@PutMapping("/confirm-all")
+	public ResponseEntity<List<User>> confirmAll() {
+		return ResponseEntity.ok(userService.findAll());
+
+	}
 
 }

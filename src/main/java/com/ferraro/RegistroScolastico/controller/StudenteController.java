@@ -1,9 +1,6 @@
 package com.ferraro.RegistroScolastico.controller;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +53,7 @@ public class StudenteController {
 	
 	@GetMapping("/classe")
 	public ResponseEntity<ClasseDTOFull> studenteGetClasse(@NonNull @RequestHeader("Authorization") String authorization){
+		log.info("AUTORIZZAZIONE {}",authorization);
 		String token = authorization.substring(7);
 		String email = jwtService.extractUsername(token);		
 		Studente studente = studenteService.findByEmail(email); //404 GESTITI

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+   <style>
+		/* Adjusted styles */
+		table.table thead th {
+			background-color: #03A9F4;
+			/* Light blue background for table header cells */
+			color: #fff;
+			/* White text */
+			vertical-align: middle;
+			/* Center align text vertically */
+		}
+
+		/* Rest of your existing CSS styles */
+		body {
+			color: #566787;
+			background: #f5f5f5;
+			font-family: 'Roboto', sans-serif;
+		}
+
+		.table-responsive {
+			margin: 30px 0;
+     
+			
+		}
+   
+
+		.table-wrapper {
+		
+		
+			/* Increased max-width for better display */
+			background: #fff;
+			padding: 20px;
+			box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+		}
+
+		.table-title {
+			padding-bottom: 10px;
+			margin: 0 0 10px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		.table-title h2 {
+			margin: 8px 0 0;
+			font-size: 22px;
+		}
+
+
+
+		table.table tr th,
+		table.table tr td {
+			border-color: #e9e9e9;
+
+		}
+
+		table.table-striped tbody tr:nth-of-type(odd) {
+			background-color: #fcfcfc;
+		}
+
+		table.table-striped.table-hover tbody tr:hover {
+			background: #f5f5f5;
+		}
+
+		.hint-text {
+			float: left;
+			margin-top: 6px;
+			font-size: 95%;
+		}
+	</style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <!-- First table -->
+            <div class="col-md-6 pr-2">
+                <div class="table-responsive">
+                    <div class="table-wrapper">
+                        <div class="table-title">
+                            <h2>Classe <b id="currentClasse"></b></h2>
+                        </div>
+                        <table id="customTable" class="table table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cognome</th>
+                                    <th>Nato il</th>
+                                    <th>Codice Fiscale</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Table rows will be dynamically generated here -->
+                            </tbody>
+                        </table>
+                        <div class="clearfix">
+                            <div class="hint-text">Totale Studenti <b id="totalStudenti"></b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second table -->
+            <div class="col-md-6 pl-2">
+                <div class="table-responsive">
+                    <div class="table-wrapper">
+                        <div class="table-title">
+                            <h2>Docenti</h2>
+                        </div>
+                        <table id="secondTable" class="table table-striped table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cognome</th>
+                                    <th>Materia</th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Table rows for the second table will be dynamically generated here -->
+                            </tbody>
+                        </table>
+                        <div class="clearfix">
+                            <div class="hint-text">Totale Docenti <b id="totalDocenti"></b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+	<script>
+    $(document).ready(function () {
+        function fetchData() {
+            $.ajax({
+                url: "/rest/api/v0/studente/classe",
+                type: "GET",
+                dataType: "json",
+                success: function (response) {
+					
+                    var currentClasse = response.anno + response.sezione;
+                    var totalStudenti = response.studenti.length;
+                    var totalDocenti = response.docenti.length;
+                    
+                    $("#currentClasse").text(currentClasse);
+                    $("#totalStudenti").text(totalStudenti);
+                     $("#totalDocenti").text(totalDocenti);
+                    
+                    $("#customTable tbody").empty();
+                    $.each(response.studenti, function (index, alunno) {
+                        var nome = alunno.nome;
+                        var cognome = alunno.cognome;
+                        var data = alunno.nascita;
+                        var cf = alunno.cf;                       
+
+                        $("#customTable tbody").append(
+                            "<tr>" +
+                            "<td>" + nome + "</td>" +
+                            "<td>" + cognome + "</td>" +
+                            "<td>" + data + "</td>" +
+                            "<td>" + cf + "</td>" +
+                            "</tr>"
+                        );
+                    });
+                    
+                    $("#secondTable tbody").empty();
+                    $.each(response.docenti, function (index, docente) {
+                        var nomeD = docente.nome;
+                        var cognomeD = docente.cognome;
+                        var materia = docente.materia;
+                                               
+
+                        $("#secondTable tbody").append(
+                            "<tr>" +
+                            "<td>" + nomeD + "</td>" +
+                            "<td>" + cognomeD + "</td>" +
+                            "<td>" + materia + "</td>" +
+                            
+                            "</tr>"
+                        );
+                    });
+                    
+                    
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error: " + error);
+                }
+            });
+        }
+
+        fetchData();
+    });
+</script>

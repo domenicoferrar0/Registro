@@ -1,11 +1,6 @@
 package com.ferraro.RegistroScolastico.dto;
 
-import java.util.Set;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.ferraro.RegistroScolastico.exceptions.RoleNotFoundException;
