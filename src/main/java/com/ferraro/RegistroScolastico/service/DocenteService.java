@@ -28,6 +28,7 @@ import com.ferraro.RegistroScolastico.exceptions.ClassAssignException;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
 import com.ferraro.RegistroScolastico.exceptions.MailNotSentException;
 import com.ferraro.RegistroScolastico.exceptions.PersonNotFoundException;
+import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 
 @Service
 @Slf4j
@@ -82,15 +83,16 @@ public class DocenteService {
 		return docenteMapper.docenteToDto(nuovoDocente);
 	}
 
-	public Docente findByCf(String cf) {
-		return docenteRepository.findByAnagrafica_Cf(cf).orElseThrow(() -> new PersonNotFoundException(cf));
+	public Docente findById(Long id) {
+		return docenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("docente: "+id));
 	}
-
+	
+	@Transactional
 	public DocenteDTO assignClasse(Docente docente, Classe classe) {
 		Set<Docente> docentiAttuali = classe.getDocenti();
 
 		boolean isMateriaOccupata = docentiAttuali.stream().anyMatch(d -> d.getMateria() == docente.getMateria());
-
+		//L'ADD AVVIENE QUI E DETERMINO SE L'OPERAZIONE HA AVUTO SUCCESSO 
 		if (isMateriaOccupata || !docente.getClassi().add(classe)) {
 			throw new ClassAssignException("Impossibile assegnare classe, materia occupata o docente già presente",
 					docenteMapper.docenteToDto(docente));
@@ -116,6 +118,15 @@ public class DocenteService {
 
 		log.info("check classe {}", classi.isEmpty());
 		return classeMapper.classesToDto(classi);
+	}
+
+	public DocenteDTO removeClasse(Docente docente, Classe classe) {
+		if(!docente.getClassi().contains(classe)) {
+			throw new ClassAssignException("Impossibile rimuovere, il docente non è assegnato a questa classe "+classe.getId(),
+					docenteMapper.docenteToDto(docente));
+		}
+		docente.getClassi().remove(classe);			//SALVATO E MAPPATO
+		return docenteMapper.docenteToDto(docenteRepository.save(docente)); 
 	}
 
 }

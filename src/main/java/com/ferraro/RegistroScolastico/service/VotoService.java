@@ -66,7 +66,7 @@ public class VotoService {
 	}
 
 	public Voto findById(Long id) {
-		return votoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+		return votoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("voto: "+id));
 	}
 
 	@Transactional

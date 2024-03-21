@@ -100,7 +100,7 @@ public class DocenteController {
 		return ResponseEntity.ok(classi);
 	}
 
-	@PostMapping("/inserimento-voto")
+	@PostMapping("/voto")
 	public ResponseEntity<?> assegnaVoto(@NonNull @RequestHeader("Authorization") String authorization,
 			@RequestBody @NonNull @Valid VotoRequest request) {
 
@@ -112,7 +112,7 @@ public class DocenteController {
 
 		// I metodi di fetch sono gestiti da ExceptionHandler in caso di not found
 		Docente docente = docenteService.findByEmail(email);
-		Studente studente = studenteService.findByCf(request.getStudenteCF());
+		Studente studente = studenteService.findById(request.getStudentId());
 
 		// Exception gestita se lo studente non ha classe o se il docente non è un suo
 		// docente
@@ -124,11 +124,11 @@ public class DocenteController {
 
 	}
 
-	@PostMapping("/inserimento-assenza")
+	@PostMapping("/assenza")
 	public ResponseEntity<?> inserisciAssenza(@RequestBody @NonNull @Valid AssenzaRequest request) {
 		log.info("inserimento assenza");
 
-		Studente studente = studenteService.findByCf(request.getStudenteCF()); // 404 Gestito
+		Studente studente = studenteService.findById(request.getStudentId()); // 404 Gestito
 		AssenzaDTO nuovaAssenza;
 		try {
 			// IllegalArgument se lo studente non ha ancora una classe o se è già stata
@@ -144,7 +144,7 @@ public class DocenteController {
 
 	}
 
-	@DeleteMapping("/delete-voto/{id}")
+	@DeleteMapping("/voto/{id}")
 	public ResponseEntity<String> deleteVoto(@NonNull @RequestHeader("Authorization") String authorization,
 			@PathVariable("id") Long id) {
 
@@ -170,7 +170,7 @@ public class DocenteController {
 		return ResponseEntity.ok().body("Voto eliminato correttamente");
 	}
 
-	@DeleteMapping("/delete-assenza/{id}")
+	@DeleteMapping("/assenza/{id}")
 	public ResponseEntity<?> deleteAssenza(@PathVariable("id") Long id) {
 		// anche qui booleano dal repository
 		System.out.println(id);
@@ -182,7 +182,7 @@ public class DocenteController {
 
 	}
 
-	@PutMapping("/update-voto/{id}")
+	@PutMapping("/voto/{id}")
 	public ResponseEntity<?> updateVoto(@NonNull @RequestHeader("Authorization") String authorization,
 			@PathVariable("id") Long id, @NonNull @Valid @RequestBody VotoRequest votoRequest) {
 		Voto voto = votoService.findById(id); // 404 SE NON LO TROVA
@@ -197,17 +197,17 @@ public class DocenteController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body("Spiacente, solo il docente che ha inserito il voto può modificarlo");
 		}
-		Studente studente = studenteService.findByCf(votoRequest.getStudenteCF()); // 404 checked
+		Studente studente = studenteService.findById(votoRequest.getStudentId()); // 404 checked
 
 		VotoDTO votoAggiornato = votoService.aggiornaVoto(voto, votoRequest, studente);
 
 		return ResponseEntity.ok(votoAggiornato);
 	}
 
-	@PutMapping("/update-assenza/{id}")
+	@PutMapping("/assenza/{id}")
 	public ResponseEntity<?> updateAssenza(@PathVariable("id") Long id,
 			@NonNull @Valid @RequestBody AssenzaRequest assenzaRequest) {
-		Studente studente = studenteService.findByCf(assenzaRequest.getStudenteCF());
+		Studente studente = studenteService.findById(assenzaRequest.getStudentId());
 
 		AssenzaDTO assenzaAggiornata = assenzaService.aggiornaAssenza(id, assenzaRequest, studente);
 

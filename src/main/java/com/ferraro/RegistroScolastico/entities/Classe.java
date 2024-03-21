@@ -20,58 +20,40 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "classi")
 @NoArgsConstructor
 @Getter
 @Setter
-
+@EqualsAndHashCode
 public class Classe {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	
+
 	@Column(nullable = false)
 	@Range(min = 1, max = 3, message = "Gli anni scolastici vanno da 1 a 3")
 	private Integer anno;
-	
+
 	@Column(nullable = false)
 	@Pattern(regexp = "^[A-Z]$", message = "La sezione è identificata da una singola lettera dell'alfabeto")
 	private String sezione;
-	
+
 	@Embedded
 	@NotNull
 	private Periodo periodo;
-	
+
 	@OneToMany(mappedBy = "classe", fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.PERSIST)
 	private Set<Studente> studenti;
-	
+
 	@ManyToMany(mappedBy = "classi", fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.PERSIST)
 	private Set<Docente> docenti;
-	
+
 	public String getNome() {
-		return getAnno()+getSezione();
+		return getAnno() + getSezione();
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(anno, sezione);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Classe other = (Classe) obj;
-		return Objects.equals(anno, other.anno) && Objects.equals(sezione, other.sezione);
-	}
-	
-	
 }

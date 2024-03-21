@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,32 +54,32 @@ public class AdminController {
 	private AssenzaService assenzaService;
 
 	// I GET GENERALI SONO RISERVATI AGLI ADMIN
-	@GetMapping(value = "/get-studenti")
+	@GetMapping(value = "/studenti")
 	public ResponseEntity<List<StudenteDTO>> getAllStudenti() {
 		return ResponseEntity.ok(studenteService.findAll());
 	}
 
-	@GetMapping(value = "/get-docenti")
+	@GetMapping(value = "/docenti")
 	public ResponseEntity<List<DocenteDTO>> getAllDocenti() {
 		return ResponseEntity.ok(docenteService.findAll());
 	}
 
-	@GetMapping(value = "/get-classi")
+	@GetMapping(value = "/classi")
 	public ResponseEntity<List<ClasseDTO>> getClasses() {
 		return ResponseEntity.ok(classeService.findAll());
 	}
 
-	@GetMapping(value = "/get-voti")
+	@GetMapping(value = "/voti")
 	public ResponseEntity<List<VotoDTO>> getVoti() {
 		return ResponseEntity.ok(votoService.findAll());
 	}
 
-	@GetMapping(value = "/get-assenze")
+	@GetMapping(value = "/assenze")
 	public ResponseEntity<List<AssenzaDTO>> getAssenze() {
 		return ResponseEntity.ok(assenzaService.findAll());
 	}
 
-	@PostMapping(value = "/save-classe")
+	@PostMapping(value = "/classe")
 	public ResponseEntity<?> saveClasse(@RequestBody @NonNull @Valid ClasseDTO classeDTO) {
 
 		ClasseDTO newClasse = classeService.saveClasse(classeDTO); // Controlla prima se esiste già
@@ -87,11 +89,11 @@ public class AdminController {
 
 	// Questo metodo è pensato solo per assegnare la classe a chi non ce l'ha
 	// ancora, è da fare un metodo più esplicito in caso di cambio classe
-	@PutMapping(value = "/studente-assign-classe")
-	public ResponseEntity<?> assignClasseToStudente(@RequestParam(value = "classeId", required = true) Long id,
-			@RequestParam(value = "studenteCF", required = true) String cf) {
-		Studente studente = studenteService.findByCf(cf); // 404
-		Classe classe = classeService.findById(id); // 404
+	@PutMapping(value = "/studente/{studentId}/classe/{classeId}")
+	public ResponseEntity<?> assignClasseToStudente(@PathVariable("classeId") Long classeId,
+			@PathVariable("studentId") Long studentId) {
+		Studente studente = studenteService.findById(studentId); // 404
+		Classe classe = classeService.findById(classeId); // 404
 
 		// Controlla se lo studente non ha già una classe, exception gestita
 		StudenteDTO studenteAggiornato = studenteService.assignClasse(studente, classe);
@@ -99,19 +101,39 @@ public class AdminController {
 		return ResponseEntity.ok().body(studenteAggiornato);
 	}
 
-	@PutMapping(value = "/docente-assign-classe")
-	public ResponseEntity<?> assignClasseToDocente(@RequestParam(value = "classeId", required = true) Long id,
-			@RequestParam(value = "docenteCF", required = true) String cf) {
-		Docente docente = docenteService.findByCf(cf);
-		Classe classe = classeService.findById(id);
-		DocenteDTO docenteAggiornato;
-		
+	@PutMapping(value = "/docente/{docenteId}/classe/{classeId}")
+	public ResponseEntity<DocenteDTO> assignClasseToDocente(@PathVariable("classeId") Long classeId,
+			@PathVariable("docenteId") Long docenteId) {
+		Docente docente = docenteService.findById(docenteId);
+		Classe classe = classeService.findById(classeId);
+
 		// Funziona solo se quella materia non è già occupata o se quel docente non è
 		// già presente nella classe
 
-		docenteAggiornato = docenteService.assignClasse(docente, classe);
+		DocenteDTO docenteAggiornato = docenteService.assignClasse(docente, classe);
 
 		return ResponseEntity.ok().body(docenteAggiornato);
 	}
+
+	@DeleteMapping(value = "/docente/{docenteId}/classe/{classeId}")
+	public ResponseEntity<DocenteDTO> removeClasseFromDocente(@PathVariable("classeId") Long classeId,
+			@PathVariable("docenteId") Long docenteId) {
+		Docente docente = docenteService.findById(docenteId);
+		Classe classe = classeService.findById(classeId);
+		DocenteDTO docenteAggiornato = docenteService.removeClasse(docente, classe);
+
+		return ResponseEntity.ok().body(docenteAggiornato);
+	}
+	
+	@DeleteMapping(value = "/studente/{studentId}/classe/{classeId}")
+	public ResponseEntity<StudenteDTO> removeClasseFromStudente(@PathVariable("classeId") Long classeId,
+			@PathVariable("studentId") Long studentId) {
+		Studente studente = studenteService.findById(studentId); // 404
+		Classe classe = classeService.findById(classeId);
+		StudenteDTO studenteAggiornato = studenteService.removeClasse(studente, classe);
+
+		return ResponseEntity.ok().body(studenteAggiornato);
+	}
+	
 
 }

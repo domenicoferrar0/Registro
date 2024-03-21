@@ -6,7 +6,6 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Getter;
@@ -16,8 +15,8 @@ import lombok.Setter;
 @Getter
 public class VotoRequest {
 	
-	@NotBlank
-	private String studenteCF;
+	@NotNull
+	private Long studentId;
 	
 	@PastOrPresent(message = "La data non può essere nel futuro")
 	@Temporal(TemporalType.DATE)

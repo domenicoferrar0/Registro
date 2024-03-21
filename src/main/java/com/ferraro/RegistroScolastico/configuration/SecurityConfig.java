@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import lombok.extern.slf4j.Slf4j;
-import com.ferraro.RegistroScolastico.service.MyUserDetails;
+import com.ferraro.RegistroScolastico.service.UserDetailsImpl;
 
 @EnableWebSecurity
 @Configuration
@@ -35,7 +35,7 @@ public class SecurityConfig {
 	private JwtAuthFilter jwtFilter;
 	
 	@Autowired
-	private MyUserDetails userDetails;
+	private UserDetailsImpl userDetails;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)

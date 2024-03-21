@@ -19,8 +19,8 @@ public class ClasseController {
 	ClasseService classeService;
 
 
-
-	@GetMapping(value = "/get-classe")
+/*
+	@GetMapping(value = "/classe")
 	public ResponseEntity<Object> getClasse(@RequestParam(value = "anno", required = true) Integer anno,
 			@RequestParam(value = "sezione", required = true) String sezione) {
 		if (anno < 1 || anno > 3 || sezione.isBlank()) {
@@ -31,5 +31,5 @@ public class ClasseController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Classe non trovata: " + anno + sezione);
 		}
 		return ResponseEntity.ok(classe);
-	}
+	} */
 }

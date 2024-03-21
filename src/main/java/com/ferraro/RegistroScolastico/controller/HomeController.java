@@ -32,7 +32,7 @@ import com.ferraro.RegistroScolastico.entities.User;
 import com.ferraro.RegistroScolastico.service.DocenteService;
 import com.ferraro.RegistroScolastico.service.JwtService;
 import com.ferraro.RegistroScolastico.service.MailService;
-import com.ferraro.RegistroScolastico.service.MyUserDetails;
+import com.ferraro.RegistroScolastico.service.UserDetailsImpl;
 import com.ferraro.RegistroScolastico.service.RoleService;
 import com.ferraro.RegistroScolastico.service.StudenteService;
 
@@ -61,7 +61,7 @@ public class HomeController {
 	private JwtService jwtService;
 
 	@Autowired
-	private MyUserDetails userService;
+	private UserDetailsImpl userService;
 
 	@Autowired
 	private MailService mailService;
@@ -90,7 +90,7 @@ public class HomeController {
 		return ResponseEntity.ok(LoginResponse.login(jwt, user.getAuthorities()));
 	}
 
-	@PostMapping(value = "/signin-studente")
+	@PostMapping(value = "/registration/studenti")
 	public ResponseEntity<?> saveStudente(@RequestBody @NonNull @Valid RegistrationForm form)
 			throws MessagingException {
 		log.info("inside the api");
@@ -111,12 +111,13 @@ public class HomeController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(nuovoStudente);
 	}
 
-	@PostMapping(value = "/signin-docente")
+	@PostMapping(value = "/registration/docenti")
 	public ResponseEntity<?> saveDocente(@RequestBody @NonNull @Valid RegistrationForm form) {
 		log.info("inside the api");
 
 		if (form.getMateria() == null) {
-			return ResponseEntity.unprocessableEntity().body("Inserisci una materia valida");
+			String materia = "Inserisci una materia valida";
+			return ResponseEntity.unprocessableEntity().body(materia);
 		}
 
 		String plainPassword = userService.generatePassword();
@@ -137,7 +138,7 @@ public class HomeController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(nuovoDocente);
 	}
 
-	@PutMapping("/confirm-email")
+	@PutMapping("/confirm")
 	public ResponseEntity<String> confirmEmail(@RequestParam(value = "token", required = true) String token) {
 		log.info("INSIDE API CONFIRM TOKEN {}", token);
 		if (!mailService.confirmEmail(token)) {

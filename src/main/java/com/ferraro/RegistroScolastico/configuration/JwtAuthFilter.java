@@ -2,6 +2,7 @@ package com.ferraro.RegistroScolastico.configuration;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,7 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.ferraro.RegistroScolastico.exceptions.UserNotEnabledException;
 import com.ferraro.RegistroScolastico.service.JwtService;
-import com.ferraro.RegistroScolastico.service.MyUserDetails;
+import com.ferraro.RegistroScolastico.service.UserDetailsImpl;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,10 +26,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
-
+	
+	@Autowired
 	private final JwtService jwtService;
-
-	private final MyUserDetails myUserDetails;
+	
+	@Autowired
+	private final UserDetailsImpl myUserDetails;
 
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,

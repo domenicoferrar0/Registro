@@ -57,7 +57,7 @@ public class AssenzaService {
 	
 	public Assenza findById(Long id) {
 		return assenzaRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(id));
+				.orElseThrow(() -> new ResourceNotFoundException("assenza: "+id));
 	}
 	
 	@Transactional
@@ -80,7 +80,7 @@ public class AssenzaService {
 
 	public AssenzaDTO aggiornaAssenza(Long id, AssenzaRequest assenzaRequest, Studente studente) {
 		Assenza assenza = assenzaRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(id));
+				.orElseThrow(() -> new ResourceNotFoundException("assenza: "+id));
 				assenza.setData(assenzaRequest.getData());
 				assenza.setOre(assenzaRequest.getOre());
 				assenza.setStudente(studente);

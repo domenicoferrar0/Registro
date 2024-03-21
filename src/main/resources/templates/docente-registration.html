@@ -135,6 +135,14 @@
 		<label for="email">Email:</label>
 		<input type="email" id="email" name="email" required>
 		<span id="emailError" class="error-message"></span>
+		<label for="materia">Materia:</label>
+				<select id="materia" name="materia" required>
+					<option disabled="disabled" selected value=" ">Seleziona materia</option>
+					<option th:each="materia : ${T(com.ferraro.RegistroScolastico.enums.Materia).values()}"
+						th:value="${materia}" th:text="${materia.nome}">
+					</option>
+				</select>
+				<span id="materiaError" class="error-message"></span>
 		<button type="submit">Submit</button>
 		<span id="conflictError" class="error-message"></span>
 		<p class="confirmation-message" style="display: none;"></p>

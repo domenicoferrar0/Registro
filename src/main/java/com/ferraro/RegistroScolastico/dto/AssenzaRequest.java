@@ -6,7 +6,6 @@ import org.hibernate.validator.constraints.Range;
 
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Getter;
@@ -21,8 +20,8 @@ public class AssenzaRequest {
 	@PastOrPresent(message = "La data non può essere nel futuro")
 	private LocalDate data;
 	
-	@NotBlank
-	private String studenteCF;
+	@NotNull
+	private Long studentId;
 	
 	@Range(min = 1, max = 6)
 	@NotNull

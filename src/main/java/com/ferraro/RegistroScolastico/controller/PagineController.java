@@ -30,10 +30,18 @@ public class PagineController {
 	public String showClasseStudente() {
 		return "studente-classe";
 	}
-	@GetMapping("/home/registrazione-studente")
+	
+	@GetMapping("/home/registrazione/studente")
 	public String showFormStudente() {
 		return "studente-registration";
 	}
+	
+	@GetMapping("/home/registrazione/docente")
+	public String showFormDocente() {
+		return "docente-registration";
+	}
+	
+	
 	
 	@GetMapping("/home/confirm")
 	public String showMailConfirmation() {

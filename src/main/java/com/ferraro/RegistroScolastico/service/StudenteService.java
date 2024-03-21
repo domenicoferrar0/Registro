@@ -14,6 +14,7 @@ import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
 import com.ferraro.RegistroScolastico.exceptions.MailNotSentException;
 import com.ferraro.RegistroScolastico.exceptions.PersonNotFoundException;
+import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.ClassAssignException;
 import com.ferraro.RegistroScolastico.exceptions.ClasseNotFoundException;
 import com.ferraro.RegistroScolastico.mapper.ClasseMapper;
@@ -80,8 +81,8 @@ public class StudenteService {
 		return studente;
 	}
 
-	public Studente findByCf(String cf) {
-		return studenteRepository.findByAnagrafica_Cf(cf).orElseThrow(() -> new PersonNotFoundException(cf));
+	public Studente findById(Long id) {
+		return studenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("studente: "+id));
 	}
 
 	@Transactional
@@ -103,6 +104,15 @@ public class StudenteService {
 			throw new ClasseNotFoundException("per questo studente ".concat(studente.getAnagrafica().getCf()));
 		}
 		return classeMapper.classeToDtoFull(classe);
+	}
+
+	public StudenteDTO removeClasse(Studente studente, Classe classe) {
+		if(!studente.getClasse().equals(classe)) {
+			throw new ClassAssignException("Impossibile rimuovere la classe, la classe fornita non corrisponde",
+					studenteMapper.studenteToDto(studente));
+		}
+		studente.setClasse(null);				//SALVATO E MAPPATO
+		return studenteMapper.studenteToDto(studenteRepository.save(studente));
 	}
 
 }

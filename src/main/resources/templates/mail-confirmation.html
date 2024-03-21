@@ -16,7 +16,7 @@
             var token = currentUrl.substring(currentUrl.length - 36);
 
             $.ajax({
-                url: "/rest/api/v0/home/confirm-email?token="+token,
+                url: "/rest/api/v0/home/confirm?token="+token,
                 type: "PUT",
                 
                 success: function(response) {
