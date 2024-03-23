@@ -1,23 +1,29 @@
 package com.ferraro.RegistroScolastico.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ferraro.RegistroScolastico.dto.StudenteDTO;
+import com.ferraro.RegistroScolastico.dto.VotoDTO;
 import com.ferraro.RegistroScolastico.dto.ClasseDTOFull;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Classe;
+import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
+import com.ferraro.RegistroScolastico.entities.Voto;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
 import com.ferraro.RegistroScolastico.exceptions.MailNotSentException;
 import com.ferraro.RegistroScolastico.exceptions.PersonNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.ClassAssignException;
 import com.ferraro.RegistroScolastico.exceptions.ClasseNotFoundException;
+import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.mapper.ClasseMapper;
+import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
 import com.ferraro.RegistroScolastico.mapper.StudenteMapper;
 import com.ferraro.RegistroScolastico.repository.AnagraficaRepository;
 import com.ferraro.RegistroScolastico.repository.StudenteRepository;
@@ -44,12 +50,18 @@ public class StudenteService {
 	private ClasseMapper classeMapper;
 
 	@Autowired
+	private DocenteMapper docenteMapper;
+
+	@Autowired
 	private MailService mailService;
+	
+	
 
 	public List<StudenteDTO> findAll() {
 		return studenteMapper.studentiToDto(studenteRepository.findAll());
 	}
-
+	
+	//Metodo che crea entità a partire dal form di registrazione, eccezione gestita in caso di chiavi uniche duplicate
 	public Studente formToStudente(RegistrationForm form) {
 		if (userRepository.existsByEmail(form.getEmail()) || anagraficaRepository.existsByCf(form.getCf())) {
 			throw new DuplicateRegistrationException(form);
@@ -57,13 +69,14 @@ public class StudenteService {
 		return studenteMapper.formToStudente(form);
 	}
 
-	@Transactional
+	@Transactional/*In concomitanza alla registrazione viene creato un token di conferma e mandato via mail.
+	Tutto nella stessa transazione, che viene annullata in caso ci siano problemi con il Mail Sender */
 	public StudenteDTO saveStudente(Studente studente, RegistrationForm form, String plainPw) {
 		Studente nuovoStudente = studenteRepository.save(studente);
 		String token = mailService.createToken(studente.getUser());
 		try {
-			mailService.sendRegistrationEmail(form, token, plainPw);
-		}catch(MessagingException e) {
+			mailService.sendRegistrationEmail(form, plainPw, token);
+		} catch (MessagingException e) {
 			throw new MailNotSentException();
 		}
 		return studenteMapper.studenteToDto(nuovoStudente);
@@ -82,7 +95,7 @@ public class StudenteService {
 	}
 
 	public Studente findById(Long id) {
-		return studenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("studente: "+id));
+		return studenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("studente: " + id));
 	}
 
 	@Transactional
@@ -92,9 +105,7 @@ public class StudenteService {
 			throw new ClassAssignException("Questo studente ha già una classe", studenteMapper.studenteToDto(studente));
 		}
 		studente.setClasse(classe);
-
 		studenteRepository.save(studente);
-
 		return studenteMapper.studenteToDto(studente);
 	}
 
@@ -107,12 +118,22 @@ public class StudenteService {
 	}
 
 	public StudenteDTO removeClasse(Studente studente, Classe classe) {
-		if(!studente.getClasse().equals(classe)) {
+		if (!studente.getClasse().equals(classe)) {
 			throw new ClassAssignException("Impossibile rimuovere la classe, la classe fornita non corrisponde",
 					studenteMapper.studenteToDto(studente));
 		}
-		studente.setClasse(null);				//SALVATO E MAPPATO
+		studente.setClasse(null); // SALVATO E MAPPATO
 		return studenteMapper.studenteToDto(studenteRepository.save(studente));
 	}
+
+	public StudenteDTO getStudenteForDocente(Studente studente, Docente docente) {
+		Classe classe = studente.getClasse();
+		if (classe == null || !classe.getDocenti().contains(docente)) {
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
+		}
+		return studenteMapper.studenteToDtoFull(studente);
+	}
+
+	
 
 }

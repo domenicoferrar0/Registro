@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ferraro.RegistroScolastico.dto.ApiResponse;
@@ -21,6 +22,7 @@ import com.ferraro.RegistroScolastico.dto.AssenzaDTO;
 import com.ferraro.RegistroScolastico.dto.AssenzaRequest;
 import com.ferraro.RegistroScolastico.dto.ClasseDTO;
 import com.ferraro.RegistroScolastico.dto.DocenteDTO;
+import com.ferraro.RegistroScolastico.dto.StudenteDTO;
 import com.ferraro.RegistroScolastico.dto.VotoDTO;
 import com.ferraro.RegistroScolastico.dto.VotoRequest;
 import com.ferraro.RegistroScolastico.entities.Assenza;
@@ -62,6 +64,12 @@ public class DocenteController {
 	@Autowired
 	private ClasseService classeService;
 
+	/*NOTA:
+	 *In buona parte dei metodi risalgo al docente attraverso il JWT, per capire se ha effettivamente l'autorizzazione 
+	 *per l'azione che sta compiendo ES: Solo un docente che appartiene alla classe di cui fa parte lo studente può
+	 *inserire dei voti per quello studente, così come solo chi ha inserito il voto può eliminarlo o modificarlo.
+	 *Buona parte delle situazioni sono gestite tramite il lancio di eccezioni custom gestite attraverso ExceptionHandler.  */
+	
 	@GetMapping("/summary")
 	public ResponseEntity<DocenteDTO> docenteSummary(@NonNull @RequestHeader("Authorization") String authorization) {
 		String token = authorization.substring(7);
@@ -74,11 +82,10 @@ public class DocenteController {
 	public ResponseEntity<?> docenteGetClasse(@NonNull @RequestHeader("Authorization") String authorization,
 			@PathVariable("classeId") Long classeId) {
 		String token = authorization.substring(7);
-		// risale al docente dal token
 		String email = jwtService.extractUsername(token);
-		Docente docente = docenteService.findByEmail(email); // 404
+		Docente docente = docenteService.findByEmail(email);
 
-		Classe classe = classeService.findById(classeId); // 404
+		Classe classe = classeService.findById(classeId);
 		if (!docente.getClassi().contains(classe)) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(ApiResponse.unauthorized(
@@ -87,59 +94,79 @@ public class DocenteController {
 		}
 		return ResponseEntity.ok(classeService.classeToDtoFull(classe));
 	}
-
-	@GetMapping("/classi")
-	public ResponseEntity<?> docenteGetClassi(@NonNull @RequestHeader("Authorization") String authorization,
-			@NonNull @Valid @RequestBody Periodo periodo) {
+	
+	@GetMapping("/classe/{classeId}/form-voti")
+	public ResponseEntity<?> docenteGetFormVoti(@NonNull @RequestHeader("Authorization") String authorization,
+			@PathVariable("classeId") Long classeId) {
 		String token = authorization.substring(7);
-		// risale al docente dal token
-		log.info("check periodo {}", periodo.getStartYear());
 		String email = jwtService.extractUsername(token);
 		Docente docente = docenteService.findByEmail(email);
-		List<ClasseDTO> classi = docenteService.getClassiByPeriodo(periodo, docente);
+
+		Classe classe = classeService.findById(classeId);
+		if (!docente.getClassi().contains(classe)) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(ApiResponse.unauthorized(
+							"Questo docente non è autorizzato a visualizzare la classe " + classe.getNome(),
+							docenteService.docenteToDto(docente)));
+		}
+		return ResponseEntity.ok(classeService.classeToDtoNoDocenti(classe));
+	}
+
+	@GetMapping("studenti/{studenteId}")
+	public ResponseEntity<StudenteDTO> docenteGetStudente(@NonNull @RequestHeader("Authorization") String authorization,
+			@PathVariable("studenteId") Long id) {
+		String token = authorization.substring(7);
+		String email = jwtService.extractUsername(token);
+		Docente docente = docenteService.findByEmail(email);
+		Studente studente = studenteService.findById(id);
+		StudenteDTO studenteDTO = studenteService.getStudenteForDocente(studente, docente);
+		return ResponseEntity.ok(studenteDTO);
+	}
+
+	@GetMapping("/studenti/{studenteId}/voti")
+	public ResponseEntity<List<VotoDTO>> docenteGetVotiStudente(
+			@NonNull @RequestHeader("Authorization") String authorization, @PathVariable("studenteId") Long id) {
+		String token = authorization.substring(7);
+		String email = jwtService.extractUsername(token);
+		Docente docente = docenteService.findByEmail(email);
+		Studente studente = studenteService.findById(id);
+		List<VotoDTO> voti = votoService.findVotiByDocente(studente, docente);
+		return ResponseEntity.ok(voti);
+	}
+
+	@GetMapping("/classi")		
+	public ResponseEntity<List<ClasseDTO>> docenteGetClassi(@NonNull @RequestHeader("Authorization") String authorization,
+			@RequestParam(value = "startYear", required = false)Integer startYear) {
+		String token = authorization.substring(7);		
+		String email = jwtService.extractUsername(token);
+		Docente docente = docenteService.findByEmail(email);
+		List<ClasseDTO> classi = docenteService.getClassi(startYear, docente);
 		return ResponseEntity.ok(classi);
 	}
 
 	@PostMapping("/voto")
-	public ResponseEntity<?> assegnaVoto(@NonNull @RequestHeader("Authorization") String authorization,
+	public ResponseEntity<VotoDTO> assegnaVoto(@NonNull @RequestHeader("Authorization") String authorization,
 			@RequestBody @NonNull @Valid VotoRequest request) {
-
-		// Risaliamo a chi sta facendo la richiesta attraverso il token di
-		// autorizzazione
 		String token = authorization.substring(7);
 		log.info("inserimento voto {}", token);
 		String email = jwtService.extractUsername(token);
-
-		// I metodi di fetch sono gestiti da ExceptionHandler in caso di not found
 		Docente docente = docenteService.findByEmail(email);
 		Studente studente = studenteService.findById(request.getStudentId());
-
-		// Exception gestita se lo studente non ha classe o se il docente non è un suo
-		// docente
 		Voto voto = votoService.creaVoto(docente, studente, request);
-
 		VotoDTO newVoto = votoService.salvaVoto(voto);
-
 		return ResponseEntity.status(HttpStatus.CREATED).body(newVoto);
-
 	}
 
 	@PostMapping("/assenza")
-	public ResponseEntity<?> inserisciAssenza(@RequestBody @NonNull @Valid AssenzaRequest request) {
+	public ResponseEntity<AssenzaDTO> inserisciAssenza(@RequestBody @NonNull @Valid AssenzaRequest request,
+			@NonNull @RequestHeader("Authorization") String authorization) {
 		log.info("inserimento assenza");
-
+		String token = authorization.substring(7);
+		String email = jwtService.extractUsername(token);
+		Docente docente = docenteService.findByEmail(email);
 		Studente studente = studenteService.findById(request.getStudentId()); // 404 Gestito
-		AssenzaDTO nuovaAssenza;
-		try {
-			// IllegalArgument se lo studente non ha ancora una classe o se è già stata
-			// segnata un'assenza quel giorno
-			Assenza assenza = assenzaService.creaAssenza(studente, request);
-			nuovaAssenza = assenzaService.salvaAssenza(assenza);
-
-		} catch (IllegalArgumentException e) {
-
-			return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-		}
+		Assenza assenza = assenzaService.creaAssenza(docente, studente, request);
+		AssenzaDTO nuovaAssenza = assenzaService.salvaAssenza(assenza);
 		return ResponseEntity.status(HttpStatus.CREATED).body(nuovaAssenza);
 
 	}
@@ -147,69 +174,45 @@ public class DocenteController {
 	@DeleteMapping("/voto/{id}")
 	public ResponseEntity<String> deleteVoto(@NonNull @RequestHeader("Authorization") String authorization,
 			@PathVariable("id") Long id) {
-
-		Voto voto = votoService.findById(id); // 404 SE NON LO TROVA
 		String token = authorization.substring(7);
-		log.info("delete voto {}", token);
-
-		// risale al docente dal token
 		String email = jwtService.extractUsername(token);
 		Docente docente = docenteService.findByEmail(email);
-
-		// Solo chi ha inserito il voto può rimuoverlo
-		if (!voto.getDocente().equals(docente)) {
-			log.error("docenti non combaciano {}", voto.getDocente().equals(docente));
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-					.body("Spiacente, solo il docente che ha inserito il voto può eliminarlo");
-		}
-		// Booleano dal repository che verifica se l'operazione ha successo
-		if (!votoService.deleteVoto(id)) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Non è stato possibile cancellare questo voto");
-		}
+		votoService.deleteVoto(id, docente);
 		return ResponseEntity.ok().body("Voto eliminato correttamente");
 	}
 
 	@DeleteMapping("/assenza/{id}")
-	public ResponseEntity<?> deleteAssenza(@PathVariable("id") Long id) {
-		// anche qui booleano dal repository
-		System.out.println(id);
-		if (!assenzaService.deleteAssenza(id)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body("Si è verificato un errore, l'assenza potrebbe non esistere");
-		}
+	public ResponseEntity<String> deleteAssenza(@PathVariable("id") Long id,
+			@NonNull @RequestHeader("Authorization") String authorization) {
+		String token = authorization.substring(7);
+		String email = jwtService.extractUsername(token);
+		Docente docente = docenteService.findByEmail(email);
+		assenzaService.deleteAssenza(id, docente);
 		return ResponseEntity.ok().body("Assenza eliminata correttamente");
 
 	}
 
 	@PutMapping("/voto/{id}")
-	public ResponseEntity<?> updateVoto(@NonNull @RequestHeader("Authorization") String authorization,
+	public ResponseEntity<VotoDTO> updateVoto(@NonNull @RequestHeader("Authorization") String authorization,
 			@PathVariable("id") Long id, @NonNull @Valid @RequestBody VotoRequest votoRequest) {
-		Voto voto = votoService.findById(id); // 404 SE NON LO TROVA
 		String token = authorization.substring(7);
 		log.info("update voto {}", token);
-
-		// risale al docente dal token
 		String email = jwtService.extractUsername(token);
 		Docente docente = docenteService.findByEmail(email);
-		if (!voto.getDocente().equals(docente)) {
-			log.error("docenti non combaciano {}", voto.getDocente().equals(docente));
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-					.body("Spiacente, solo il docente che ha inserito il voto può modificarlo");
-		}
 		Studente studente = studenteService.findById(votoRequest.getStudentId()); // 404 checked
-
-		VotoDTO votoAggiornato = votoService.aggiornaVoto(voto, votoRequest, studente);
-
+		VotoDTO votoAggiornato = votoService.aggiornaVoto(docente, id, votoRequest, studente);
 		return ResponseEntity.ok(votoAggiornato);
 	}
 
 	@PutMapping("/assenza/{id}")
-	public ResponseEntity<?> updateAssenza(@PathVariable("id") Long id,
-			@NonNull @Valid @RequestBody AssenzaRequest assenzaRequest) {
+	public ResponseEntity<AssenzaDTO> updateAssenza(@PathVariable("id") Long id,
+			@NonNull @Valid @RequestBody AssenzaRequest assenzaRequest,
+			@NonNull @RequestHeader("Authorization") String authorization) {
 		Studente studente = studenteService.findById(assenzaRequest.getStudentId());
-
-		AssenzaDTO assenzaAggiornata = assenzaService.aggiornaAssenza(id, assenzaRequest, studente);
+		String token = authorization.substring(7);
+		String email = jwtService.extractUsername(token);
+		Docente docente = docenteService.findByEmail(email);
+		AssenzaDTO assenzaAggiornata = assenzaService.aggiornaAssenza(docente, id, assenzaRequest, studente);
 
 		return ResponseEntity.ok(assenzaAggiornata);
 	}

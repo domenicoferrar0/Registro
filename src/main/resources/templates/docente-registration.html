@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Student Registration Form</title>
+	<title>Docente Registration Form</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<style>
 		body {
@@ -164,12 +164,12 @@
 
         $.ajax({
             type: 'POST',
-            url: '/rest/api/v0/home/registration/studenti',
+            url: '/rest/api/v0/home/registration/docenti',
             contentType: 'application/json', // Specify content type
             data: JSON.stringify(json), // Convert json object to JSON string
             success: function (response) {
                 console.log(response);
-                displayConfirmationMessage('Studente registrato correttamente');
+                displayConfirmationMessage('Docente registrato correttamente');
                 
             },
             error: function (xhr, status, error) {
@@ -181,7 +181,7 @@
                         displayErrorMessage(field, errorMessage);
                     }
                 }
-                if (xhr.status === 409) {
+                else if (xhr.status === 409) {
                     const conflictMessage = xhr.responseJSON.message;
                     $('#conflictError').text(conflictMessage);
                 }
@@ -194,7 +194,8 @@
 
     function clearMessages() {
         $('.error-message').text('');
-        $('.confirmation-message').hide(); // Hide confirmation message
+        $('.confirmation-message').hide(); 
+        $('#conflictError').text('');
     }
 
     function displayConfirmationMessage(message) {

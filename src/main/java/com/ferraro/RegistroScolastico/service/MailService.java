@@ -1,7 +1,7 @@
 package com.ferraro.RegistroScolastico.service;
 
 import java.nio.charset.StandardCharsets;
-
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -71,7 +71,7 @@ public class MailService {
 	public boolean confirmEmail(String token) {
 		ConfirmationToken confirmationToken = tokenRepository.findByConfirmationToken(token)
 				.orElseThrow(() -> new ConfirmationTokenNotFoundException(token));
-
+		log.info("TOKEN TROVATO {}",token);
 		User user = confirmationToken.getUser();
 		if (user == null || user.isEnabled()) {
 			return false;
@@ -80,5 +80,9 @@ public class MailService {
 		tokenRepository.delete(confirmationToken);
 		userRepository.save(user);
 		return true;
+	}
+	
+	public List<ConfirmationToken> allToken(){
+		return tokenRepository.findAll();
 	}
 }

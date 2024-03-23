@@ -18,6 +18,8 @@ public interface StudenteMapper {
 	StudenteMapper INSTANCE = Mappers.getMapper(StudenteMapper.class);
 	
 	@Mapping(source = "user.email", target = "email")
+	@Mapping(target = "voti", ignore = true)
+	@Mapping(target = "assenze", ignore = true)
 	public StudenteDTO studenteToDto(Studente studente);
 	
 	default List<StudenteDTO> studentiToDto(List<Studente> studenti){
@@ -45,5 +47,8 @@ public interface StudenteMapper {
 	@Mapping(source = "anagrafica.nascita", target = "nascita")
 	public StudenteDTOSimple studenteToDtoSimple(Studente studente);
 	
-		
+	@Mapping(target = "assenze.studente", ignore = true)
+	@Mapping(target = "voti.studente", ignore = true)
+	@Mapping(source = "user.email", target = "email")
+	public StudenteDTO studenteToDtoFull(Studente studente);
 }

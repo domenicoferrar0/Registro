@@ -16,9 +16,14 @@ import org.springframework.stereotype.Service;
 import com.ferraro.RegistroScolastico.dto.AssenzaDTO;
 import com.ferraro.RegistroScolastico.dto.AssenzaRequest;
 import com.ferraro.RegistroScolastico.entities.Assenza;
+import com.ferraro.RegistroScolastico.entities.Classe;
+import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
+import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
+import com.ferraro.RegistroScolastico.exceptions.StudenteHasNoClassException;
 import com.ferraro.RegistroScolastico.mapper.AssenzaMapper;
+import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
 import com.ferraro.RegistroScolastico.repository.AssenzaRepository;
 
 import jakarta.transaction.Transactional;
@@ -34,25 +39,32 @@ public class AssenzaService {
 	@Autowired
 	private AssenzaMapper assenzaMapper;
 	
-	public Assenza creaAssenza(Studente studente, AssenzaRequest request) {
+	@Autowired
+	private DocenteMapper docenteMapper;
+	
+	/*IN ORDINE:
+	 *Uno studente senza classe non può risultare assente.
+	 *Se è già stato segnato assente per quel giorno non può risultare assente.
+	 *Solo il docente non è un suo docente non può inserirgli un'assenza  */
+	public Assenza creaAssenza(Docente docente, Studente studente, AssenzaRequest request) {
 		if (studente.getClasse() == null) {
-			throw new IllegalArgumentException("Uno studente non può avere avere assenze se non ha una classe");
-		}
-		
+			throw new StudenteHasNoClassException(request);
+		}		
 		if(assenzaRepository.existsByStudenteAndData(studente, request.getData())) {
-			throw new IllegalArgumentException("Impossibile inserire l'assenza, questo studente è già stato segnato assente in questa data: "
-					.concat(request.getData().toString()));
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
+		}
+		Classe classe = studente.getClasse();
+		if(!classe.getDocenti().contains(docente)) {
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
 		Assenza assenza = assenzaMapper.requestToVoto(request);
 		assenza.setStudente(studente);
-		return assenza;
-		
+		return assenza;		
 	}
 	
-	@Transactional
-	public AssenzaDTO salvaAssenza(Assenza assenza) {
-		assenzaRepository.save(assenza);
-		return assenzaMapper.assenzaToDto(assenza);
+	@Transactional//Restituisco l'assenza Mappata ed aggiornata.
+	public AssenzaDTO salvaAssenza(Assenza assenza) {	
+		return assenzaMapper.assenzaToDto(assenzaRepository.save(assenza));
 	}
 	
 	public Assenza findById(Long id) {
@@ -60,16 +72,17 @@ public class AssenzaService {
 				.orElseThrow(() -> new ResourceNotFoundException("assenza: "+id));
 	}
 	
-	@Transactional
-	public boolean deleteAssenza(Long id) {
-		System.out.println(id);
-		try {
-			return assenzaRepository.removeById(id)>0;
+	@Transactional/*Trova l'assenza a partire dall'Id
+	 				controlla se il docente ha l'autorizzazione per farlo
+	 				ed infine elimina l'assenza se l'esito è positivo.*/
+	public void deleteAssenza(Long id, Docente docente) {		
+		Assenza assenza = assenzaRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("assenza: "+id));
+		Classe classe = assenza.getStudente().getClasse();
+		if (!classe.getDocenti().contains(docente)) {
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
-		catch(Exception e) {
-			e.printStackTrace();;
-			return false;
-		}
+		assenzaRepository.delete(assenza);		
 	}
 	
 	public List<AssenzaDTO> findAll(){
@@ -78,12 +91,17 @@ public class AssenzaService {
 		
 	}
 
-	public AssenzaDTO aggiornaAssenza(Long id, AssenzaRequest assenzaRequest, Studente studente) {
+	public AssenzaDTO aggiornaAssenza(Docente docente, Long id, AssenzaRequest assenzaRequest, Studente studente) {
 		Assenza assenza = assenzaRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("assenza: "+id));
 				assenza.setData(assenzaRequest.getData());
 				assenza.setOre(assenzaRequest.getOre());
 				assenza.setStudente(studente);
+				
+				Classe classe = studente.getClasse();
+				if(!classe.getDocenti().contains(docente)) {
+					throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
+				}
 								//salvato e mappato;
 		return assenzaMapper.assenzaToDto(assenzaRepository.save(assenza));
 	}

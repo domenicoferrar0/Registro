@@ -1,5 +1,7 @@
 package com.ferraro.RegistroScolastico.dto;
 
+import java.util.Set;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -16,5 +18,9 @@ public class StudenteDTO {
 	private String email;
 	
 	private ClasseDTO classe;
+	
+	private Set<AssenzaDTO> assenze;
+	
+	private Set<VotoDTO> voti;
 		
 }

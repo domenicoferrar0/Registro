@@ -8,6 +8,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +17,7 @@ import lombok.Setter;
 public class VotoRequest {
 	
 	@NotNull
+	@Min(value = 0, message = "Inserisci uno studente valido")
 	private Long studentId;
 	
 	@PastOrPresent(message = "La data non può essere nel futuro")

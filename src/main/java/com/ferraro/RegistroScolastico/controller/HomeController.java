@@ -114,10 +114,10 @@ public class HomeController {
 	@PostMapping(value = "/registration/docenti")
 	public ResponseEntity<?> saveDocente(@RequestBody @NonNull @Valid RegistrationForm form) {
 		log.info("inside the api");
-
+		log.info("MATERIA {}", form.getMateria());
 		if (form.getMateria() == null) {
-			String materia = "Inserisci una materia valida";
-			return ResponseEntity.unprocessableEntity().body(materia);
+			String messaggio = "Inserisci una materia valida";
+			return ResponseEntity.unprocessableEntity().body(Collections.singletonMap("materia", messaggio));
 		}
 
 		String plainPassword = userService.generatePassword();

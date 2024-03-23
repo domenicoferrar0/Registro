@@ -23,7 +23,7 @@ public class StudenteDTOSimple {
 	
 	private LocalDate nascita;
 	
-	private Materia materia;
+	
 	
 	
 }

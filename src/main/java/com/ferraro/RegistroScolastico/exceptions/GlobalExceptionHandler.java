@@ -70,4 +70,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleConstraintException(ConstraintViolationException ex){
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
+	
+	@ExceptionHandler(StudenteHasNoClassException.class)
+	public ResponseEntity<ApiResponse> handleNoClassException(StudenteHasNoClassException ex){
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.forbidden(ex.getMessage(), ex.getObject()));
+	}
 }

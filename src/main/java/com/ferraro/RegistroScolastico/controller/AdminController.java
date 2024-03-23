@@ -22,11 +22,13 @@ import com.ferraro.RegistroScolastico.dto.DocenteDTO;
 import com.ferraro.RegistroScolastico.dto.StudenteDTO;
 import com.ferraro.RegistroScolastico.dto.VotoDTO;
 import com.ferraro.RegistroScolastico.entities.Classe;
+import com.ferraro.RegistroScolastico.entities.ConfirmationToken;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.service.AssenzaService;
 import com.ferraro.RegistroScolastico.service.ClasseService;
 import com.ferraro.RegistroScolastico.service.DocenteService;
+import com.ferraro.RegistroScolastico.service.MailService;
 import com.ferraro.RegistroScolastico.service.StudenteService;
 import com.ferraro.RegistroScolastico.service.VotoService;
 
@@ -52,6 +54,9 @@ public class AdminController {
 
 	@Autowired
 	private AssenzaService assenzaService;
+	
+	@Autowired
+	private MailService mailService;
 
 	// I GET GENERALI SONO RISERVATI AGLI ADMIN
 	@GetMapping(value = "/studenti")
@@ -78,12 +83,15 @@ public class AdminController {
 	public ResponseEntity<List<AssenzaDTO>> getAssenze() {
 		return ResponseEntity.ok(assenzaService.findAll());
 	}
+	
+	@GetMapping(value = "/token")
+	public ResponseEntity<List<ConfirmationToken>> getToken() {
+		return ResponseEntity.ok(mailService.allToken());
+	}
 
 	@PostMapping(value = "/classe")
 	public ResponseEntity<?> saveClasse(@RequestBody @NonNull @Valid ClasseDTO classeDTO) {
-
 		ClasseDTO newClasse = classeService.saveClasse(classeDTO); // Controlla prima se esiste già
-
 		return ResponseEntity.status(HttpStatus.CREATED).body(newClasse);
 	}
 
@@ -92,12 +100,9 @@ public class AdminController {
 	@PutMapping(value = "/studente/{studentId}/classe/{classeId}")
 	public ResponseEntity<?> assignClasseToStudente(@PathVariable("classeId") Long classeId,
 			@PathVariable("studentId") Long studentId) {
-		Studente studente = studenteService.findById(studentId); // 404
-		Classe classe = classeService.findById(classeId); // 404
-
-		// Controlla se lo studente non ha già una classe, exception gestita
+		Studente studente = studenteService.findById(studentId); 
+		Classe classe = classeService.findById(classeId); 
 		StudenteDTO studenteAggiornato = studenteService.assignClasse(studente, classe);
-
 		return ResponseEntity.ok().body(studenteAggiornato);
 	}
 
@@ -106,12 +111,7 @@ public class AdminController {
 			@PathVariable("docenteId") Long docenteId) {
 		Docente docente = docenteService.findById(docenteId);
 		Classe classe = classeService.findById(classeId);
-
-		// Funziona solo se quella materia non è già occupata o se quel docente non è
-		// già presente nella classe
-
 		DocenteDTO docenteAggiornato = docenteService.assignClasse(docente, classe);
-
 		return ResponseEntity.ok().body(docenteAggiornato);
 	}
 
@@ -121,17 +121,15 @@ public class AdminController {
 		Docente docente = docenteService.findById(docenteId);
 		Classe classe = classeService.findById(classeId);
 		DocenteDTO docenteAggiornato = docenteService.removeClasse(docente, classe);
-
 		return ResponseEntity.ok().body(docenteAggiornato);
 	}
 	
 	@DeleteMapping(value = "/studente/{studentId}/classe/{classeId}")
 	public ResponseEntity<StudenteDTO> removeClasseFromStudente(@PathVariable("classeId") Long classeId,
 			@PathVariable("studentId") Long studentId) {
-		Studente studente = studenteService.findById(studentId); // 404
+		Studente studente = studenteService.findById(studentId); 
 		Classe classe = classeService.findById(classeId);
 		StudenteDTO studenteAggiornato = studenteService.removeClasse(studente, classe);
-
 		return ResponseEntity.ok().body(studenteAggiornato);
 	}
 	

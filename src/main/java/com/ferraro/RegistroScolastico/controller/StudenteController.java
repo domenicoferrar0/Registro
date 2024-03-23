@@ -39,15 +39,18 @@ public class StudenteController {
 	
 	@Autowired 
 	private VotoService votoService;
+	
+	/*NOTA:
+	 *In questo caso il JWT è usato per verificare l'entità dello studente e fornirgli il contenuto
+	 *a lui legato.
+	 *La maggior parte delle fetch su un'entità specifica vengono gestite da eccezioni custom ed ExceptionHandler   */
+	
 
 	@GetMapping("/summary")
-	public ResponseEntity<StudenteDTO> studenteSummary(@NonNull @RequestHeader("Authorization") String authorization){
-		log.info("api summary studente {}", authorization);
-		
-		//Estraggo lo studente attraverso il Token
+	public ResponseEntity<StudenteDTO> studenteSummary(@NonNull @RequestHeader("Authorization") String authorization){		
 		String token = authorization.substring(7);
 		String email = jwtService.extractUsername(token);		
-		StudenteDTO studente = studenteService.findDtoByEmail(email); //404 GESTITO
+		StudenteDTO studente = studenteService.findDtoByEmail(email);
 		return ResponseEntity.ok().body(studente);
 	}
 	
@@ -56,7 +59,7 @@ public class StudenteController {
 		log.info("AUTORIZZAZIONE {}",authorization);
 		String token = authorization.substring(7);
 		String email = jwtService.extractUsername(token);		
-		Studente studente = studenteService.findByEmail(email); //404 GESTITI
+		Studente studente = studenteService.findByEmail(email);
 		ClasseDTOFull classe = studenteService.getClasse(studente);
 		return ResponseEntity.ok(classe);
 	}
@@ -65,15 +68,10 @@ public class StudenteController {
 	public ResponseEntity<Page<VotoDTO>> studenteGetVoti(@NonNull @RequestHeader("Authorization") String authorization,
 			@RequestParam("page") int page, @RequestParam(value = "searchTerm", required = false) String searchTerm){
 		int pageSize = 3;
-		
-		log.info("page {}", page);
-		log.info("term {}", searchTerm);
 		String token = authorization.substring(7);
 		String email = jwtService.extractUsername(token);		
 		Studente studente = studenteService.findByEmail(email);
-				//dove page è la pagina corrente e 10 i max elements per pagina
 		Page<VotoDTO> voti = votoService.getVotiStudente(studente, page-1, pageSize, searchTerm); 
-		log.info("voti {}", voti.isEmpty());
 		return ResponseEntity.ok(voti);
 	}
 	
@@ -84,8 +82,7 @@ public class StudenteController {
 		String token = authorization.substring(7);
 		String email = jwtService.extractUsername(token);		
 		Studente studente = studenteService.findByEmail(email);
-		Page<AssenzaDTO> assenze = assenzaService.getAssenzeStudente(studente, page-1, pageSize, startRange);
-		
+		Page<AssenzaDTO> assenze = assenzaService.getAssenzeStudente(studente, page-1, pageSize, startRange);		
 		return ResponseEntity.ok(assenze);
 	}
 

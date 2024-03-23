@@ -1,6 +1,7 @@
 package com.ferraro.RegistroScolastico.service;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -13,11 +14,13 @@ import org.springframework.stereotype.Service;
 
 import com.ferraro.RegistroScolastico.dto.VotoDTO;
 import com.ferraro.RegistroScolastico.dto.VotoRequest;
+import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.entities.Voto;
 import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
+import com.ferraro.RegistroScolastico.exceptions.StudenteHasNoClassException;
 import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
 import com.ferraro.RegistroScolastico.mapper.VotoMapper;
 import com.ferraro.RegistroScolastico.repository.VotoRepository;
@@ -44,7 +47,7 @@ public class VotoService {
 	public Voto creaVoto(Docente docente, Studente studente, VotoRequest request) {
 		if (studente.getClasse() == null) {
 
-			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
+			throw new StudenteHasNoClassException(request);
 
 		}
 		Set<Docente> docentiClasse = studente.getClasse().getDocenti();
@@ -65,28 +68,29 @@ public class VotoService {
 		return votoMapper.votoToDto(newVoto);
 	}
 
-	public Voto findById(Long id) {
-		return votoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("voto: "+id));
-	}
+	
 
 	@Transactional
-	public boolean deleteVoto(Long id) {
-		try {
-			return votoRepository.removeById(id) > 0;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
+	public void deleteVoto(Long id, Docente docente) {
+		Voto voto = votoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("voto: " + id));
+		if (!voto.getDocente().equals(docente)) {
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
+		votoRepository.delete(voto);
 	}
 
-	public VotoDTO aggiornaVoto(Voto voto, VotoRequest votoRequest, Studente studente) {
+	public VotoDTO aggiornaVoto(Docente docente, Long id, VotoRequest votoRequest, Studente studente) {
+		Voto voto = votoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("voto: " + id));
+		if (!voto.getDocente().equals(docente)) {
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
+		}
 		voto.setStudente(studente);
 		voto.setData(votoRequest.getData());
 		voto.setVoto(votoRequest.getVoto());
-		
+
 		return votoMapper.votoToDto(votoRepository.save(voto));
 	}
-	
+
 	public Page<VotoDTO> getVotiStudente(Studente studente, int page, int size, String searchTerm) {
 		List<VotoDTO> votiTot;
 		if (searchTerm == null || searchTerm.isBlank()) {
@@ -105,5 +109,15 @@ public class VotoService {
 		List<VotoDTO> sublist = votiTot.subList(start, end);
 
 		return new PageImpl<>(sublist, pageRequest, votiTot.size());
+	}
+	
+	public List<VotoDTO> findVotiByDocente(Studente studente, Docente docente) {
+		Classe classe = studente.getClasse();
+		if (classe == null || !classe.getDocenti().contains(docente)) {
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
+		}
+		Set<Voto> voti = studente.getVoti();
+		return voti.stream().filter((v) -> v.getDocente().equals(docente)).map(votoMapper::votoToDto)
+				.collect(Collectors.toList());
 	}
 }

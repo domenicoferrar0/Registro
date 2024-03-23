@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<title>Inserimento Voto</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 500px;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    form {
+        display: grid;
+        gap: 10px;
+    }
+    label {
+        font-weight: bold;
+    }
+    input[type="number"], select, input[type="date"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+    input[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2 id="currentClasse"></h2>
+    <form id="votoForm">
+        <label for="studentId">Studente:</label>
+        <select id="studentId" name="studentId">
+         <option value=-1>-- Scegli uno studente --</option>  
+        </select>
+		<span id="studentIdError" class="error-message"></span>
+        <label for="voto">Voto (0-10):</label>
+        <input type="number" id="voto" name="voto" placeholder="Enter grade" step="0.5" max="10" min="0">
+		<span id="votoError" class="error-message"></span>
+        <label for="data">Data:</label>
+        <input type="date" id="data" name="data">
+		<span id="dataError" class="error-message"></span>
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+<script>
+$(document).ready(function(){
+    var currentUrl = window.location.href;
+    var position = currentUrl.lastIndexOf("/");
+    var classeId = currentUrl.substring(position + 1);
+
+    function fetchData(){     
+         $.ajax({
+            url: "/rest/api/v0/docente/classe/"+classeId+"/form-voti",
+            type: "GET",
+            dataType: "json",
+            success: function(response){
+                var currentClasse = response.anno + " " + response.sezione + " " +
+                    response.periodo.startYear + " " + response.periodo.finishYear;
+
+                $("#currentClasse").text(currentClasse);
+
+                $.each(response.studenti, function(index, studente){
+                    var select = studente.nome + " " + studente.cognome + "| " + studente.cf;
+                    var id = studente.id;
+                    $("#studentId").append('<option value="' + id + '">' + select + '</option>');
+                });
+            }
+        });     
+    }
+
+    // Call fetchData when the document is ready
+    fetchData();
+
+    // Add submit event listener to the form
+    $("#votoForm").submit(function(event) {
+        // Prevent default form submission
+        event.preventDefault();
+
+        // Gather form data
+        var formData = {
+            studentId: $("#studentId").val(),
+            voto: $("#voto").val(),
+            data: $("#data").val()
+        };
+		
+		
+		 clearMessages();
+        // Send form data as JSON in request body
+        $.ajax({
+            url: "/docente/voto",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(formData),
+            success: function(response) {
+                // Handle success response
+                console.log("Success:", response);
+            },
+            error: function(xhr, status, error) {
+                // Handle error response
+                console.error("Error:", xhr, status, error);
+                
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON;
+                    for (const field in errors) {
+                        const errorMessage = errors[field];
+                        displayErrorMessage(field, errorMessage);
+                    }
+                }
+                else {
+                    
+                    $('#genericError').text("Errore imprevisto, riprova più tardi");
+                }
+            }
+        });
+    });
+    
+     function displayErrorMessage(field, errorMessage) {
+            const errorElement = document.getElementById(`${field}Error`);
+            if (errorElement) {
+                errorElement.textContent = errorMessage;
+            }
+        }
+        
+        function clearMessages() {
+        $('.error-message').text('');
+        
+    }
+        
+        
+});
+</script>
+</body>
+</html>

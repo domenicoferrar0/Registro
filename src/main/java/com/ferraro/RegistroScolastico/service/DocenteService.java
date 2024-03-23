@@ -62,16 +62,17 @@ public class DocenteService {
 	public List<DocenteDTO> findAll() {
 		return docenteMapper.docentiToDto(docenteRepository.findAll());
 	}
-
+	
+	//Metodo che crea entità a partire dal form di registrazione, eccezione gestita in caso di chiavi uniche duplicate
 	public Docente formToDocente(RegistrationForm form) {
 		if (userRepository.existsByEmail(form.getEmail()) || anagraficaRepository.existsByCf(form.getCf())) {
 			throw new DuplicateRegistrationException(form);
 		}
 		return docenteMapper.formToDocente(form);
-
 	}
 
-	@Transactional
+	@Transactional /*In concomitanza alla registrazione viene creato un token di conferma e mandato via mail.
+	Tutto nella stessa transazione, che viene annullata in caso ci siano problemi con il Mail Sender */
 	public DocenteDTO saveDocente(Docente docente, RegistrationForm form, String plainPw) {
 		Docente nuovoDocente = docenteRepository.save(docente);
 		String token = mailService.createToken(docente.getUser());
@@ -84,15 +85,14 @@ public class DocenteService {
 	}
 
 	public Docente findById(Long id) {
-		return docenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("docente: "+id));
+		return docenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("docente: " + id));
 	}
-	
+
 	@Transactional
 	public DocenteDTO assignClasse(Docente docente, Classe classe) {
 		Set<Docente> docentiAttuali = classe.getDocenti();
-
 		boolean isMateriaOccupata = docentiAttuali.stream().anyMatch(d -> d.getMateria() == docente.getMateria());
-		//L'ADD AVVIENE QUI E DETERMINO SE L'OPERAZIONE HA AVUTO SUCCESSO 
+		//Faccio riferimento al booleano generato dall'add al set per determinare se l'operazione ha avuto successo
 		if (isMateriaOccupata || !docente.getClassi().add(classe)) {
 			throw new ClassAssignException("Impossibile assegnare classe, materia occupata o docente già presente",
 					docenteMapper.docenteToDto(docente));
@@ -103,30 +103,33 @@ public class DocenteService {
 
 	public Docente findByEmail(String email) {
 		return docenteRepository.findByUser_Email(email).orElseThrow(() -> new UsernameNotFoundException(email));
-
 	}
-
+	
 	public DocenteDTO findDtoByEmail(String email) {
-
 		return docenteMapper.docenteToDto(findByEmail(email));
 	}
-
-	public List<ClasseDTO> getClassiByPeriodo(Periodo periodo, Docente docente) {
-		List<Classe> classi = classeRepository.findByDocenteAndPeriodo(docente, periodo);
-		// classi.sort(Comparator.comparing(Classe::getSezione));
-		// classi.sort(Comparator.comparing(Classe::getAnno));;
-
+	
+	/*Periodo è una classe embeddata nell'entità Classe, in maniera opzionale il docente può cercare
+	 * le sue classi di uno specifico Periodo */
+	public List<ClasseDTO> getClassi(Integer startYear, Docente docente) {
+		Set<Classe> classi;
+		if (startYear == null || startYear < 0) {
+			classi = docente.getClassi();
+		} else {
+			classi = classeRepository.findByDocenteAndPeriodo(docente, new Periodo(startYear, startYear + 1));
+		}
 		log.info("check classe {}", classi.isEmpty());
 		return classeMapper.classesToDto(classi);
 	}
 
 	public DocenteDTO removeClasse(Docente docente, Classe classe) {
-		if(!docente.getClassi().contains(classe)) {
-			throw new ClassAssignException("Impossibile rimuovere, il docente non è assegnato a questa classe "+classe.getId(),
+		if (!docente.getClassi().contains(classe)) {
+			throw new ClassAssignException(
+					"Impossibile rimuovere, il docente non è assegnato a questa classe " + classe.getId(),
 					docenteMapper.docenteToDto(docente));
 		}
-		docente.getClassi().remove(classe);			//SALVATO E MAPPATO
-		return docenteMapper.docenteToDto(docenteRepository.save(docente)); 
+		docente.getClassi().remove(classe); // SALVATO E MAPPATO
+		return docenteMapper.docenteToDto(docenteRepository.save(docente));
 	}
 
 }

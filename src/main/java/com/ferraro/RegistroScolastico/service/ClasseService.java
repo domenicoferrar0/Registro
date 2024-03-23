@@ -2,6 +2,8 @@ package com.ferraro.RegistroScolastico.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +41,7 @@ public class ClasseService {
 	}
 
 	public List<ClasseDTO> findAll() {
-		List<Classe> lista = classeRepository.findAll();
+		Set<Classe> lista = classeRepository.findAllClasse();
 		return classeMapper.classesToDto(lista);
 	}
 
@@ -62,7 +64,11 @@ public class ClasseService {
 	public ClasseDTOFull classeToDtoFull(Classe classe) {
 		return classeMapper.classeToDtoFull(classe);
 	}
-
+	
+	public ClasseDTOFull classeToDtoNoDocenti(Classe classe) {
+		return classeMapper.classeToDtoNoDocenti(classe);
+	}
+	
 	public Classe findById(Long classeId) {
 		
 		return classeRepository.findById(classeId)

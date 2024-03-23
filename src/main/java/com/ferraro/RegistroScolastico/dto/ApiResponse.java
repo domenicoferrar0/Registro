@@ -25,5 +25,8 @@ public class ApiResponse {
 	public static ApiResponse conflict(String message, Object object) {
 		return new ApiResponse(HttpStatus.CONFLICT, message, object);
 	}
-
+	
+	public static ApiResponse forbidden(String message, Object object) {
+		return new ApiResponse(HttpStatus.FORBIDDEN, message, object);
+	}
 }
