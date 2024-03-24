@@ -1,6 +1,5 @@
 package com.ferraro.RegistroScolastico.entities;
 
-import java.util.Objects;
 import java.util.Set;
 
 import org.hibernate.validator.constraints.Range;

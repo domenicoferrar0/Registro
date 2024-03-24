@@ -24,7 +24,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString(exclude = "classe")
 public class Studente {
 	
 	@Id
