@@ -6,7 +6,9 @@ import java.util.Set;
 import com.ferraro.RegistroScolastico.enums.Materia;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -47,8 +49,10 @@ public class Docente {
 	private Set<Voto> voti;
 	
 	@Enumerated(EnumType.STRING)
+	@ElementCollection(targetClass = Materia.class)
+	@CollectionTable(name = "docente_materie", joinColumns = @JoinColumn(name = "docente_id"))
 	@Column(nullable = false)
-	private Materia materia;
+	private Set<Materia> materia;
 	
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinTable(name = "docenti_classi",

@@ -1,6 +1,7 @@
 package com.ferraro.RegistroScolastico.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,11 @@ import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Periodo;
+import com.ferraro.RegistroScolastico.enums.Materia;
 import com.ferraro.RegistroScolastico.exceptions.ClassAssignException;
+import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
 import com.ferraro.RegistroScolastico.exceptions.MailNotSentException;
-import com.ferraro.RegistroScolastico.exceptions.PersonNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 
 @Service
@@ -54,7 +56,18 @@ public class DocenteService {
 
 	@Autowired
 	private MailService mailService;
-
+	
+	@Autowired 
+	private JwtService jwtService;
+	
+	
+	
+	public Docente extractDocente(String authorization) {
+		String token = authorization.substring(7);
+		String email = jwtService.extractUsername(token);		
+		return findByEmail(email);
+	}
+	
 	public DocenteDTO docenteToDto(Docente docente) {
 		return docenteMapper.docenteToDto(docente);
 	}
@@ -89,17 +102,26 @@ public class DocenteService {
 	}
 
 	@Transactional
-	public DocenteDTO assignClasse(Docente docente, Classe classe) {
-		Set<Docente> docentiAttuali = classe.getDocenti();
-		boolean isMateriaOccupata = docentiAttuali.stream().anyMatch(d -> d.getMateria() == docente.getMateria());
+	public DocenteDTO assignClasse(Docente docente, Classe classe, Set<Materia> materie) {
+		boolean hasDocenteMaterie = materie.stream().allMatch((m) -> docente.getMateria().contains(m));
+		
+		if(!hasDocenteMaterie) {
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
+		}
+		
+		boolean anyMateriaOccupata = materie.stream().anyMatch((m) -> classe.getMaterieAssegnate().containsKey(m));
 		//Faccio riferimento al booleano generato dall'add al set per determinare se l'operazione ha avuto successo
-		if (isMateriaOccupata || !docente.getClassi().add(classe)) {
+		if (anyMateriaOccupata || !docente.getClassi().add(classe)) {
 			throw new ClassAssignException("Impossibile assegnare classe, materia occupata o docente già presente",
 					docenteMapper.docenteToDto(docente));
 		} // Salvo e ritorno il docente Mappato
+		for (Materia m : materie) {
+			classe.getMaterieAssegnate().put(m, docente);
+		}
+		classeRepository.save(classe);
 		return docenteMapper.docenteToDto(docenteRepository.save(docente));
 
-	}
+	} 
 
 	public Docente findByEmail(String email) {
 		return docenteRepository.findByUser_Email(email).orElseThrow(() -> new UsernameNotFoundException(email));
@@ -121,13 +143,24 @@ public class DocenteService {
 		log.info("check classe {}", classi.isEmpty());
 		return classeMapper.classesToDto(classi);
 	}
-
+	
 	public DocenteDTO removeClasse(Docente docente, Classe classe) {
+		
 		if (!docente.getClassi().contains(classe)) {
 			throw new ClassAssignException(
 					"Impossibile rimuovere, il docente non è assegnato a questa classe " + classe.getId(),
 					docenteMapper.docenteToDto(docente));
 		}
+		Map<Materia, Docente> materieAssegnate = classe.getMaterieAssegnate();
+		if (materieAssegnate.containsValue(docente)) {
+			for (Map.Entry<Materia, Docente> m : materieAssegnate.entrySet()) {
+				if(m.getValue().equals(docente)) {
+					materieAssegnate.remove(m.getKey());
+				}
+			}
+		}
+		classe.setMaterieAssegnate(materieAssegnate);
+		classeRepository.save(classe);
 		docente.getClassi().remove(classe); // SALVATO E MAPPATO
 		return docenteMapper.docenteToDto(docenteRepository.save(docente));
 	}

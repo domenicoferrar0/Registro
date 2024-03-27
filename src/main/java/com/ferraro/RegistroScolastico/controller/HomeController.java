@@ -2,6 +2,7 @@ package com.ferraro.RegistroScolastico.controller;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -115,7 +116,7 @@ public class HomeController {
 	public ResponseEntity<?> saveDocente(@RequestBody @NonNull @Valid RegistrationForm form) {
 		log.info("inside the api");
 		log.info("MATERIA {}", form.getMateria());
-		if (form.getMateria() == null) {
+		if (form.getMateria() == null || form.getMateria().isEmpty()){
 			String messaggio = "Inserisci una materia valida";
 			return ResponseEntity.unprocessableEntity().body(Collections.singletonMap("materia", messaggio));
 		}
@@ -148,11 +149,23 @@ public class HomeController {
 		return ResponseEntity.ok("Congratulazione, la tua email è stata verificata");
 	}
 
-	// DA TOGLIERE
+	/*
 	@PutMapping("/confirm-all")
 	public ResponseEntity<List<User>> confirmAll() {
 		return ResponseEntity.ok(userService.findAll());
 
 	}
-
+	
+	@PostMapping("/new-admin")
+	public User newAdmin() {
+		Role role = roleService.findByName("ROLE_ADMIN");
+		Set<Role> roles = Collections.singleton(role);
+		User user = new User();
+		user.setRoles(roles);
+		user.setEmail("admin@mail.com");
+		user.setPassword(encoder.encode("admin"));
+		user.setEnabled(true);
+		return userService.saveUser(user);
+	}
+*/
 }

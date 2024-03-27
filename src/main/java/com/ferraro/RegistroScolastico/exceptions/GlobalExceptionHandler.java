@@ -75,4 +75,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse> handleNoClassException(StudenteHasNoClassException ex){
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.forbidden(ex.getMessage(), ex.getObject()));
 	}
+	
+	@ExceptionHandler(MateriaHandlingException.class)
+	public ResponseEntity<ApiResponse> materiaException(MateriaHandlingException ex){
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.forbidden(ex.getMessage(), ex.getObject()));
+	}
 }

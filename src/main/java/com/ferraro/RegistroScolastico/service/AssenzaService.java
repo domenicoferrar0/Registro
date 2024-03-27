@@ -24,6 +24,7 @@ import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.StudenteHasNoClassException;
 import com.ferraro.RegistroScolastico.mapper.AssenzaMapper;
 import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
+import com.ferraro.RegistroScolastico.mapper.StudenteMapper;
 import com.ferraro.RegistroScolastico.repository.AssenzaRepository;
 
 import jakarta.transaction.Transactional;
@@ -42,13 +43,16 @@ public class AssenzaService {
 	@Autowired
 	private DocenteMapper docenteMapper;
 	
+	@Autowired
+	private StudenteMapper studenteMapper;
+	
 	/*IN ORDINE:
 	 *Uno studente senza classe non può risultare assente.
 	 *Se è già stato segnato assente per quel giorno non può risultare assente.
 	 *Solo il docente non è un suo docente non può inserirgli un'assenza  */
 	public Assenza creaAssenza(Docente docente, Studente studente, AssenzaRequest request) {
 		if (studente.getClasse() == null) {
-			throw new StudenteHasNoClassException(request);
+			throw new StudenteHasNoClassException(studenteMapper.studenteToDto(studente));
 		}		
 		if(assenzaRepository.existsByStudenteAndData(studente, request.getData())) {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));

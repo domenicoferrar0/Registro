@@ -1,8 +1,13 @@
 package com.ferraro.RegistroScolastico.dto;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.hibernate.validator.constraints.Range;
 
+import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Periodo;
+import com.ferraro.RegistroScolastico.enums.Materia;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,4 +33,6 @@ public class ClasseDTO {
 	private String sezione;
 	
 	private Periodo periodo;
+	
+	private Map<Materia, Docente> materieAssegnate;
 }

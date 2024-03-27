@@ -38,7 +38,7 @@
         border-radius: 5px;
         box-sizing: border-box;
     }
-    button[type="submit"] {
+    input[type="submit"] {
         width: 100%;
         padding: 10px;
         background-color: #007bff;
@@ -47,7 +47,7 @@
         border-radius: 5px;
         cursor: pointer;
     }
-    button[type="submit"]:hover {
+    input[type="submit"]:hover {
         background-color: #0056b3;
     }
 </style>
@@ -62,14 +62,7 @@
          <option value=-1>-- Scegli uno studente --</option>  
         </select>
 		<span id="studentIdError" class="error-message"></span>
-        <label for="voto">Voto (0-10):</label>
-        <input type="number" id="voto" name="voto" placeholder="Enter grade" step="0.5" max="10" min="0">
 		<span id="votoError" class="error-message"></span>
-		<label for="materia"> Materia</label>
-		<select id="materia" name="materia">
-		 <option value="" disabled="disabled">-- Scegli una materia --</option>  
-        </select>
-        <span id="materiaError" class="error-message"></span>
         <label for="data">Data:</label>
         <input type="date" id="data" name="data">
 		<span id="dataError" class="error-message"></span>
@@ -84,9 +77,9 @@ $(document).ready(function(){
     var position = currentUrl.lastIndexOf("/");
     var classeId = currentUrl.substring(position + 1);
 
-    function fetchStudenti(){     
+    function fetchData(){     
          $.ajax({
-            url: "/rest/api/v0/docente/classe/"+classeId+"/studenti",
+            url: "/rest/api/v0/docente/classe/"+classeId+"/form",
             type: "GET",
             dataType: "json",
             success: function(response){
@@ -103,25 +96,10 @@ $(document).ready(function(){
             }
         });     
     }
-    
-    function fetchStudenti(){     
-        $.ajax({
-           url: "/rest/api/v0/docente/materie",
-           type: "GET",
-           dataType: "json",
-           success: function(response){
-
-               $.each(response, function(index, materia){
-                   
-                   $("#materia").append('<option value="' + materia + '">' + materia + '</option>');
-               });
-           }
-       });     
-   }
 
     // Call fetchData when the document is ready
-    fetchStudenti();
-	fetchMaterie();
+    fetchData();
+
     // Add submit event listener to the form
     $("#votoForm").submit(function(event) {
         // Prevent default form submission

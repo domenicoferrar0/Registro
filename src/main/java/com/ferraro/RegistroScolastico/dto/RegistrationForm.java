@@ -1,6 +1,7 @@
 package com.ferraro.RegistroScolastico.dto;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import com.ferraro.RegistroScolastico.enums.Genere;
 import com.ferraro.RegistroScolastico.enums.Materia;
@@ -60,5 +61,5 @@ public class RegistrationForm {
     
     
     @Enumerated(EnumType.STRING)
-    private Materia materia;
+    private Set<Materia> materia;
 }

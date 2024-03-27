@@ -2,6 +2,10 @@ package com.ferraro.RegistroScolastico.dto;
 
 import java.time.LocalDate;
 
+import com.ferraro.RegistroScolastico.enums.Materia;
+
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.DecimalMax;
@@ -29,5 +33,8 @@ public class VotoRequest {
     @DecimalMax(value = "10.0", message = "il voto deve essere compreso tra 0 e 10")
 	@NotNull
 	private Double voto;
-
+	
+	@Enumerated(EnumType.STRING)
+	@NotNull
+	private Materia materia;
 }

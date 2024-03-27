@@ -22,6 +22,7 @@ import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.StudenteHasNoClassException;
 import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
+import com.ferraro.RegistroScolastico.mapper.StudenteMapper;
 import com.ferraro.RegistroScolastico.mapper.VotoMapper;
 import com.ferraro.RegistroScolastico.repository.VotoRepository;
 
@@ -39,19 +40,24 @@ public class VotoService {
 	@Autowired
 	private DocenteMapper docenteMapper;
 
+	@Autowired
+	private StudenteMapper studenteMapper;
+
 	public List<VotoDTO> findAll() {
 		Set<Voto> voti = new HashSet<>(votoRepository.findAll());
 		return votoMapper.votiToDto(voti);
 	}
-
+	
+	
 	public Voto creaVoto(Docente docente, Studente studente, VotoRequest request) {
 		if (studente.getClasse() == null) {
 
-			throw new StudenteHasNoClassException(request);
+			throw new StudenteHasNoClassException(studenteMapper.studenteToDto(studente));
 
 		}
 		Set<Docente> docentiClasse = studente.getClasse().getDocenti();
-		if (!docentiClasse.contains(docente)) {
+		//Se il docente non è assegnato alla classe oppure se prova ad inserire un voto per una materia che non è la sua
+		if (!docentiClasse.contains(docente) || !docente.getMateria().contains(request.getMateria())){
 
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
@@ -67,8 +73,6 @@ public class VotoService {
 		Voto newVoto = votoRepository.save(voto);
 		return votoMapper.votoToDto(newVoto);
 	}
-
-	
 
 	@Transactional
 	public void deleteVoto(Long id, Docente docente) {
@@ -110,7 +114,7 @@ public class VotoService {
 
 		return new PageImpl<>(sublist, pageRequest, votiTot.size());
 	}
-	
+
 	public List<VotoDTO> findVotiByDocente(Studente studente, Docente docente) {
 		Classe classe = studente.getClasse();
 		if (classe == null || !classe.getDocenti().contains(docente)) {

@@ -12,7 +12,7 @@ import com.ferraro.RegistroScolastico.dto.StudenteDTOSimple;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Studente;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = DocenteMapper.class)
 public interface StudenteMapper {
 
 	StudenteMapper INSTANCE = Mappers.getMapper(StudenteMapper.class);

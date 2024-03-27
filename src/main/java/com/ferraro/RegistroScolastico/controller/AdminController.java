@@ -1,6 +1,7 @@
 package com.ferraro.RegistroScolastico.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.ConfirmationToken;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
+import com.ferraro.RegistroScolastico.enums.Materia;
 import com.ferraro.RegistroScolastico.service.AssenzaService;
 import com.ferraro.RegistroScolastico.service.ClasseService;
 import com.ferraro.RegistroScolastico.service.DocenteService;
@@ -59,6 +61,7 @@ public class AdminController {
 	private MailService mailService;
 
 	// I GET GENERALI SONO RISERVATI AGLI ADMIN
+	
 	@GetMapping(value = "/studenti")
 	public ResponseEntity<List<StudenteDTO>> getAllStudenti() {
 		return ResponseEntity.ok(studenteService.findAll());
@@ -108,10 +111,10 @@ public class AdminController {
 
 	@PutMapping(value = "/docente/{docenteId}/classe/{classeId}")
 	public ResponseEntity<DocenteDTO> assignClasseToDocente(@PathVariable("classeId") Long classeId,
-			@PathVariable("docenteId") Long docenteId) {
+			@PathVariable("docenteId") Long docenteId, @NonNull @RequestBody Set<Materia> materie) {
 		Docente docente = docenteService.findById(docenteId);
 		Classe classe = classeService.findById(classeId);
-		DocenteDTO docenteAggiornato = docenteService.assignClasse(docente, classe);
+		DocenteDTO docenteAggiornato = docenteService.assignClasse(docente, classe, materie);
 		return ResponseEntity.ok().body(docenteAggiornato);
 	}
 

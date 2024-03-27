@@ -1,17 +1,28 @@
 package com.ferraro.RegistroScolastico.entities;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.validator.constraints.Range;
 
+import com.ferraro.RegistroScolastico.enums.Materia;
+
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.MapKeyEnumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -50,6 +61,13 @@ public class Classe {
 
 	@ManyToMany(mappedBy = "classi", fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.PERSIST)
 	private Set<Docente> docenti;
+
+	@ManyToMany
+	@JoinTable(name = "materie_assegnate", joinColumns = @JoinColumn(name = "classe_id"),
+	inverseJoinColumns = @JoinColumn(name = "docente_id"))
+	@MapKeyEnumerated(EnumType.STRING)
+	@MapKeyColumn(name = "materia")
+	private Map<Materia, Docente> materieAssegnate;
 
 	public String getNome() {
 		return getAnno() + getSezione();

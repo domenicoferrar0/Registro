@@ -41,6 +41,10 @@ public class UserDetailsImpl implements UserDetailsService {
 		userRepository.saveAll(list);
 		return list;
 	}
+	
+	public User saveUser(User user) {
+		return userRepository.save(user);
+	}
 
 	@Override
 	public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username)

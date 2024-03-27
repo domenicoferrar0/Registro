@@ -142,7 +142,8 @@
                 dataType: "json",
                 success: function (response) {
 					
-                    var currentClasse = response.anno + response.sezione;
+                	var currentClasse = response.anno + " " + response.sezione + " " +
+                    response.periodo.startYear + " " + response.periodo.finishYear;
                     var totalStudenti = response.studenti.length;
                     var totalDocenti = response.docenti.length;
                     

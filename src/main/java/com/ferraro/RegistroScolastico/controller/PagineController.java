@@ -2,6 +2,7 @@ package com.ferraro.RegistroScolastico.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class PagineController {
@@ -46,6 +47,11 @@ public class PagineController {
 	@GetMapping("/home/confirm")
 	public String showMailConfirmation() {
 		return "mail-confirmation";
+	}
+	
+	@GetMapping("/docente/form-voti/classe/{classeId}")
+	public String showVotoForm(@PathVariable("classeId") Long classeId) {
+		return "docente-form-voti";
 	}
 	
 }

@@ -1,5 +1,7 @@
 package com.ferraro.RegistroScolastico.dto;
 
+import java.util.Set;
+
 import com.ferraro.RegistroScolastico.enums.Materia;
 
 import lombok.Getter;
@@ -19,6 +21,6 @@ public class DocenteDTOSimple {
 
 	private String cf;
 	
-	private Materia materia;
+	private Set<Materia> materia;
 
 }

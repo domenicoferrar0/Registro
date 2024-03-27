@@ -26,7 +26,6 @@ public interface DocenteMapper {
 	@Mapping(source = "form.indirizzo", target = "anagrafica.indirizzo")
 	@Mapping(source = "form.genere", target = "anagrafica.genere")
 	@Mapping(source = "form.luogoDiNascita", target = "anagrafica.luogoDiNascita")
-	@Mapping(source = "form.materia", target = "materia")
 	public Docente formToDocente(RegistrationForm form);
 	
 	@Mapping(source = "user.email", target = "email")

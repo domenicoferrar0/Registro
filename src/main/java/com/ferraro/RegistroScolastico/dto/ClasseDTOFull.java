@@ -1,8 +1,12 @@
 package com.ferraro.RegistroScolastico.dto;
 
+import java.util.Map;
 import java.util.Set;
 
+import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Periodo;
+import com.ferraro.RegistroScolastico.enums.Materia;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,4 +25,6 @@ public class ClasseDTOFull {
 	private Set<DocenteDTOSimple> docenti;
 	
 	private Periodo periodo;
+	
+	private Map<Materia, Docente> materieAssegnate;
 }

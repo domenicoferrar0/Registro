@@ -4,22 +4,20 @@ import java.time.LocalDate;
 
 import com.ferraro.RegistroScolastico.enums.Materia;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
+@AllArgsConstructor
 @Getter
-public class VotoDTO {
-
-	private Long id;
+@Setter
+public class VotoMedia {
 
 	private StudenteDTOSimple studente;
-
+	
 	private LocalDate data;
-
-	private DocenteDTOSimple docente;
-
-	private Double voto;
+	
+	private Double votoMedio;
 	
 	private Materia materia;
 }
