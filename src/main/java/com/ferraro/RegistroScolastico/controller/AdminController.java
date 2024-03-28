@@ -93,7 +93,7 @@ public class AdminController {
 	}
 
 	@PostMapping(value = "/classe")
-	public ResponseEntity<?> saveClasse(@RequestBody @NonNull @Valid ClasseDTO classeDTO) {
+	public ResponseEntity<ClasseDTO> saveClasse(@RequestBody @NonNull @Valid ClasseDTO classeDTO) {
 		ClasseDTO newClasse = classeService.saveClasse(classeDTO); // Controlla prima se esiste già
 		return ResponseEntity.status(HttpStatus.CREATED).body(newClasse);
 	}
@@ -101,7 +101,7 @@ public class AdminController {
 	// Questo metodo è pensato solo per assegnare la classe a chi non ce l'ha
 	// ancora, è da fare un metodo più esplicito in caso di cambio classe
 	@PutMapping(value = "/studente/{studentId}/classe/{classeId}")
-	public ResponseEntity<?> assignClasseToStudente(@PathVariable("classeId") Long classeId,
+	public ResponseEntity<StudenteDTO> assignClasseToStudente(@PathVariable("classeId") Long classeId,
 			@PathVariable("studentId") Long studentId) {
 		Studente studente = studenteService.findById(studentId); 
 		Classe classe = classeService.findById(classeId); 
@@ -116,6 +116,25 @@ public class AdminController {
 		Classe classe = classeService.findById(classeId);
 		DocenteDTO docenteAggiornato = docenteService.assignClasse(docente, classe, materie);
 		return ResponseEntity.ok().body(docenteAggiornato);
+	}
+	
+	//CREA API PER LIBERARE ED ASSEGNARE MATERIE USANDO CLASSESERVICE
+	
+	@DeleteMapping(value = "/classe/{classeId}/materia")
+	public ResponseEntity<ClasseDTO> liberaMateria(@PathVariable("classeId") Long classeId,
+			@RequestParam("materia") Materia materia){
+		Classe classe = classeService.findById(classeId);
+		ClasseDTO classeAggiornata = classeService.liberaMateria(materia, classe);
+		return ResponseEntity.ok(classeAggiornata);
+	}
+	
+	@PutMapping(value = "/classe/{classeId}/docente/{docenteId}/materia")
+	public ResponseEntity<ClasseDTO> assegnaMateria(@PathVariable("classeId") Long classeId,
+			@PathVariable("docenteId") Long docenteId, @RequestParam("materia") Materia materia){
+		Classe classe = classeService.findById(classeId);
+		Docente docente = docenteService.findById(docenteId);
+		ClasseDTO classeAggiornata = classeService.assegnaMateria(materia, classe, docente);
+		return ResponseEntity.ok(classeAggiornata);
 	}
 
 	@DeleteMapping(value = "/docente/{docenteId}/classe/{classeId}")

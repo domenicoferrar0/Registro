@@ -26,6 +26,7 @@ import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Periodo;
 import com.ferraro.RegistroScolastico.enums.Materia;
+import com.ferraro.RegistroScolastico.enums.Resource;
 import com.ferraro.RegistroScolastico.exceptions.ClassAssignException;
 import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
@@ -98,12 +99,12 @@ public class DocenteService {
 	}
 
 	public Docente findById(Long id) {
-		return docenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("docente: " + id));
+		return docenteRepository.findById(id).orElseThrow(() -> new  ResourceNotFoundException(Resource.DOCENTE, id));
 	}
 
 	@Transactional
 	public DocenteDTO assignClasse(Docente docente, Classe classe, Set<Materia> materie) {
-		boolean hasDocenteMaterie = materie.stream().allMatch((m) -> docente.getMateria().contains(m));
+		boolean hasDocenteMaterie = materie.stream().allMatch((m) -> docente.getMaterie().contains(m));
 		
 		if(!hasDocenteMaterie) {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));

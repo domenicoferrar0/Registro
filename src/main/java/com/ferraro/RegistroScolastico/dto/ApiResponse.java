@@ -29,4 +29,8 @@ public class ApiResponse {
 	public static ApiResponse forbidden(String message, Object object) {
 		return new ApiResponse(HttpStatus.FORBIDDEN, message, object);
 	}
+	
+	public static ApiResponse notFound(String message, Object object) {
+		return new ApiResponse(HttpStatus.NOT_FOUND, message, object);
+	}
 }

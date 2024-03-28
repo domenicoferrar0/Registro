@@ -18,6 +18,7 @@ import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.entities.Voto;
+import com.ferraro.RegistroScolastico.enums.Resource;
 import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.StudenteHasNoClassException;
@@ -57,7 +58,7 @@ public class VotoService {
 		}
 		Set<Docente> docentiClasse = studente.getClasse().getDocenti();
 		//Se il docente non è assegnato alla classe oppure se prova ad inserire un voto per una materia che non è la sua
-		if (!docentiClasse.contains(docente) || !docente.getMateria().contains(request.getMateria())){
+		if (!docentiClasse.contains(docente) || !docente.getMaterie().contains(request.getMateria())){
 
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
@@ -76,7 +77,7 @@ public class VotoService {
 
 	@Transactional
 	public void deleteVoto(Long id, Docente docente) {
-		Voto voto = votoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("voto: " + id));
+		Voto voto = votoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Resource.VOTO, id));
 		if (!voto.getDocente().equals(docente)) {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
@@ -84,8 +85,8 @@ public class VotoService {
 	}
 
 	public VotoDTO aggiornaVoto(Docente docente, Long id, VotoRequest votoRequest, Studente studente) {
-		Voto voto = votoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("voto: " + id));
-		if (!voto.getDocente().equals(docente)) {
+		Voto voto = votoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Resource.VOTO, id));
+		if (!voto.getDocente().equals(docente) || !docente.getMaterie().contains(votoRequest.getMateria())) {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
 		voto.setStudente(studente);

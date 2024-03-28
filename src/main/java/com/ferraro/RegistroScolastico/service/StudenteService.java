@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.ferraro.RegistroScolastico.dto.StudenteDTO;
 import com.ferraro.RegistroScolastico.dto.StudenteDTOSimple;
 import com.ferraro.RegistroScolastico.dto.VotoDTO;
-import com.ferraro.RegistroScolastico.dto.VotoMedia;
 import com.ferraro.RegistroScolastico.dto.ClasseDTOFull;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Classe;
@@ -24,13 +22,13 @@ import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.entities.Voto;
 import com.ferraro.RegistroScolastico.enums.Materia;
+import com.ferraro.RegistroScolastico.enums.Resource;
 import com.ferraro.RegistroScolastico.exceptions.DuplicateRegistrationException;
 import com.ferraro.RegistroScolastico.exceptions.MailNotSentException;
-import com.ferraro.RegistroScolastico.exceptions.PersonNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.StudenteHasNoClassException;
+import com.ferraro.RegistroScolastico.exceptions.StudenteHasNoVotiException;
 import com.ferraro.RegistroScolastico.exceptions.ClassAssignException;
-import com.ferraro.RegistroScolastico.exceptions.ClasseNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.mapper.ClasseMapper;
 import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
@@ -74,37 +72,37 @@ public class StudenteService {
 		return findByEmail(email);
 	}
 	
-	public List<VotoMedia> getMediaVoti(Studente studente){
+	public List<VotoDTO> getMediaVoti(Studente studente){
 		if (studente.getClasse()== null) {
 			throw new StudenteHasNoClassException(studenteMapper.studenteToDto(studente));
 		}
 		
 		Set<Voto> voti = studente.getVoti();
 		if(voti.isEmpty()) {
-			return Collections.emptyList();
+			throw new StudenteHasNoVotiException(studenteMapper.studenteToDto(studente));
 		}
 		LocalDate data = LocalDate.now();
 		Map<Materia, Double> mappaVoti = voti.stream().collect(Collectors.groupingBy(Voto::getMateria, Collectors.averagingDouble(Voto::getVoto)));
-		List<VotoMedia> votoMedia = new ArrayList<VotoMedia>();
+		List<VotoDTO> votoMedia = new ArrayList<VotoDTO>();
 		StudenteDTOSimple studenteDto = studenteMapper.studenteToDtoSimple(studente);
 		for (Map.Entry<Materia, Double> m : mappaVoti.entrySet()) {
-			VotoMedia voto = new VotoMedia(studenteDto, data, m.getValue(), m.getKey());
+			VotoDTO voto = new VotoDTO(studenteDto, data, m.getValue(), m.getKey());
 			votoMedia.add(voto);
 		}
 		return votoMedia;
 	}
 	
-	public VotoMedia votoMedio(Studente studente, Materia materia) {
+	public VotoDTO votoMedio(Studente studente, Materia materia) {
 		if (studente.getClasse()== null) {
 			throw new StudenteHasNoClassException(studenteMapper.studenteToDto(studente));
 		}
 		List<Voto> votiMateria = studente.getVoti().stream().filter((d) -> d.getMateria() == materia).collect(Collectors.toList());
 		if(votiMateria.isEmpty()) {
-			throw new ResourceNotFoundException("voti studente "+studente.getAnagrafica().getCf());
+			throw new StudenteHasNoVotiException(studenteMapper.studenteToDto(studente));
 		}
 		Double votoMedio = votiMateria.stream().collect(Collectors.averagingDouble(Voto::getVoto));
 		StudenteDTOSimple studenteDto = studenteMapper.studenteToDtoSimple(studente);
-		return new VotoMedia(studenteDto, LocalDate.now(), votoMedio, materia);
+		return new VotoDTO(studenteDto, LocalDate.now(), votoMedio, materia);
 	}
 
 	public List<StudenteDTO> findAll() {
@@ -145,7 +143,7 @@ public class StudenteService {
 	}
 
 	public Studente findById(Long id) {
-		return studenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("studente: " + id));
+		return studenteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Resource.STUDENTE, id));
 	}
 
 	@Transactional
@@ -162,7 +160,7 @@ public class StudenteService {
 	public ClasseDTOFull getClasse(Studente studente) {
 		Classe classe = studente.getClasse();
 		if (classe == null) {
-			throw new ClasseNotFoundException("per questo studente ".concat(studente.getAnagrafica().getCf()));
+			throw new StudenteHasNoClassException(studenteMapper.studenteToDto(studente));
 		}
 		return classeMapper.classeToDtoFull(classe);
 	}

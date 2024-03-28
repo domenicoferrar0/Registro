@@ -35,8 +35,7 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.unprocessableEntity().body(errors);
 	}
 
-	@ExceptionHandler({ RoleNotFoundException.class, UsernameNotFoundException.class, PersonNotFoundException.class,
-			ClasseNotFoundException.class, ResourceNotFoundException.class, ConfirmationTokenNotFoundException.class })
+	@ExceptionHandler({ RoleNotFoundException.class, UsernameNotFoundException.class, ResourceNotFoundException.class, ConfirmationTokenNotFoundException.class })
 	public ResponseEntity<String> handleNotFoundException(Exception ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
@@ -79,5 +78,15 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(MateriaHandlingException.class)
 	public ResponseEntity<ApiResponse> materiaException(MateriaHandlingException ex){
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.forbidden(ex.getMessage(), ex.getObject()));
+	}
+	
+	@ExceptionHandler(StudenteHasNoVotiException.class)
+	public ResponseEntity<ApiResponse> studentNoVotiException(StudenteHasNoVotiException ex){
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.notFound(ex.getMessage(), ex.getObject()));
+	}
+	
+	@ExceptionHandler(AssenzaAlreadyExistsException.class)
+	public ResponseEntity<String> assenzaAlreadyExists(AssenzaAlreadyExistsException ex){
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 	}
 }

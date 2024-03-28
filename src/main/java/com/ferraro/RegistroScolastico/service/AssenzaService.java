@@ -19,6 +19,8 @@ import com.ferraro.RegistroScolastico.entities.Assenza;
 import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
+import com.ferraro.RegistroScolastico.enums.Resource;
+import com.ferraro.RegistroScolastico.exceptions.AssenzaAlreadyExistsException;
 import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.StudenteHasNoClassException;
@@ -36,80 +38,84 @@ public class AssenzaService {
 
 	@Autowired
 	private AssenzaRepository assenzaRepository;
-	
+
 	@Autowired
 	private AssenzaMapper assenzaMapper;
-	
+
 	@Autowired
 	private DocenteMapper docenteMapper;
-	
+
 	@Autowired
 	private StudenteMapper studenteMapper;
-	
-	/*IN ORDINE:
-	 *Uno studente senza classe non può risultare assente.
-	 *Se è già stato segnato assente per quel giorno non può risultare assente.
-	 *Solo il docente non è un suo docente non può inserirgli un'assenza  */
+
+	/*
+	 * IN ORDINE: Uno studente senza classe non può risultare assente. Se è già
+	 * stato segnato assente per quel giorno non può risultare assente. Solo il
+	 * docente non è un suo docente non può inserirgli un'assenza
+	 */
 	public Assenza creaAssenza(Docente docente, Studente studente, AssenzaRequest request) {
 		if (studente.getClasse() == null) {
 			throw new StudenteHasNoClassException(studenteMapper.studenteToDto(studente));
-		}		
-		if(assenzaRepository.existsByStudenteAndData(studente, request.getData())) {
-			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
+		}
+		if (assenzaRepository.existsByStudenteAndData(studente, request.getData())) {
+			throw new AssenzaAlreadyExistsException(studente.getCf(), request.getData());
 		}
 		Classe classe = studente.getClasse();
-		if(!classe.getDocenti().contains(docente)) {
+		if (!classe.getDocenti().contains(docente)) {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
 		Assenza assenza = assenzaMapper.requestToVoto(request);
 		assenza.setStudente(studente);
-		return assenza;		
+		return assenza;
 	}
-	
-	@Transactional//Restituisco l'assenza Mappata ed aggiornata.
-	public AssenzaDTO salvaAssenza(Assenza assenza) {	
+
+	@Transactional // Restituisco l'assenza Mappata ed aggiornata.
+	public AssenzaDTO salvaAssenza(Assenza assenza) {
 		return assenzaMapper.assenzaToDto(assenzaRepository.save(assenza));
 	}
-	
+
 	public Assenza findById(Long id) {
-		return assenzaRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("assenza: "+id));
+		return assenzaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(Resource.ASSENZA, id));
 	}
-	
-	@Transactional/*Trova l'assenza a partire dall'Id
-	 				controlla se il docente ha l'autorizzazione per farlo
-	 				ed infine elimina l'assenza se l'esito è positivo.*/
-	public void deleteAssenza(Long id, Docente docente) {		
+
+	@Transactional /*
+					 * Trova l'assenza a partire dall'Id controlla se il docente ha l'autorizzazione
+					 * per farlo ed infine elimina l'assenza se l'esito è positivo.
+					 */
+	public void deleteAssenza(Long id, Docente docente) {
 		Assenza assenza = assenzaRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("assenza: "+id));
+				.orElseThrow(() -> new ResourceNotFoundException(Resource.ASSENZA, id));
 		Classe classe = assenza.getStudente().getClasse();
 		if (!classe.getDocenti().contains(docente)) {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
-		assenzaRepository.delete(assenza);		
+		assenzaRepository.delete(assenza);
 	}
-	
-	public List<AssenzaDTO> findAll(){
+
+	public List<AssenzaDTO> findAll() {
 		Set<Assenza> assenze = new HashSet<>(assenzaRepository.findAll());
 		return assenzaMapper.assenzeToDto(assenze);
-		
+
 	}
 
 	public AssenzaDTO aggiornaAssenza(Docente docente, Long id, AssenzaRequest assenzaRequest, Studente studente) {
 		Assenza assenza = assenzaRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("assenza: "+id));
-				assenza.setData(assenzaRequest.getData());
-				assenza.setOre(assenzaRequest.getOre());
-				assenza.setStudente(studente);
-				
-				Classe classe = studente.getClasse();
-				if(!classe.getDocenti().contains(docente)) {
-					throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
-				}
-								//salvato e mappato;
+				.orElseThrow(() -> new ResourceNotFoundException(Resource.ASSENZA, id));
+		if (assenzaRepository.existsByStudenteAndData(studente, assenzaRequest.getData())) {
+			throw new AssenzaAlreadyExistsException(studente.getCf(), assenzaRequest.getData());
+		}
+		assenza.setData(assenzaRequest.getData());
+		assenza.setOre(assenzaRequest.getOre());
+		assenza.setStudente(studente);
+
+		Classe classe = studente.getClasse();
+		if (!classe.getDocenti().contains(docente)) {
+			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
+		}
+		// salvato e mappato;
 		return assenzaMapper.assenzaToDto(assenzaRepository.save(assenza));
 	}
-	
+
 	public Page<AssenzaDTO> getAssenzeStudente(Studente studente, int page, int size, LocalDate startRange) {
 		List<AssenzaDTO> assenzeTot;
 		if (startRange == null) {
@@ -123,7 +129,7 @@ public class AssenzaService {
 		Pageable pageRequest = PageRequest.of(page, size);
 		int start = (int) pageRequest.getOffset();
 		int end = Math.min((start + pageRequest.getPageSize()), assenzeTot.size());
-		
+
 		List<AssenzaDTO> sublist = assenzeTot.subList(start, end);
 		return new PageImpl<>(sublist, pageRequest, assenzeTot.size());
 	}

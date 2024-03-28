@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Range;
 
 import com.ferraro.RegistroScolastico.enums.Materia;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -62,7 +63,7 @@ public class Classe {
 	@ManyToMany(mappedBy = "classi", fetch = FetchType.LAZY, cascade = jakarta.persistence.CascadeType.PERSIST)
 	private Set<Docente> docenti;
 
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "materie_assegnate", joinColumns = @JoinColumn(name = "classe_id"),
 	inverseJoinColumns = @JoinColumn(name = "docente_id"))
 	@MapKeyEnumerated(EnumType.STRING)

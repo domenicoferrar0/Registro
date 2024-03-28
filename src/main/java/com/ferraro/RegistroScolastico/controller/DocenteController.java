@@ -113,7 +113,7 @@ public class DocenteController {
 	@GetMapping("/materie")
 	public ResponseEntity<Set<Materia>> docenteGetMaterie(@NonNull @RequestHeader("Authorization") String authorization){
 		Docente docente = docenteService.extractDocente(authorization);
-		return ResponseEntity.ok(docente.getMateria());
+		return ResponseEntity.ok(docente.getMaterie());
 	}
 
 	@GetMapping("studenti/{studenteId}")

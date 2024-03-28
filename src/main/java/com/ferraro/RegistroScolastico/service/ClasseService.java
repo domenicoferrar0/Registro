@@ -12,12 +12,13 @@ import com.ferraro.RegistroScolastico.dto.ClasseDTO;
 import com.ferraro.RegistroScolastico.dto.ClasseDTOFull;
 import com.ferraro.RegistroScolastico.entities.Periodo;
 import com.ferraro.RegistroScolastico.enums.Materia;
+import com.ferraro.RegistroScolastico.enums.Resource;
 import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.exceptions.ClasseAlreadyExistsException;
-import com.ferraro.RegistroScolastico.exceptions.ClasseNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.MateriaHandlingException;
+import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.mapper.ClasseMapper;
 import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
 import com.ferraro.RegistroScolastico.repository.ClasseRepository;
@@ -68,12 +69,12 @@ public class ClasseService {
 	}
 	
 	public ClasseDTO assegnaMateria(Materia materia, Classe classe, Docente docente) {
-		if (!classe.getDocenti().contains(docente) || !docente.getMateria().contains(materia)) {
+		if (!classe.getDocenti().contains(docente) || !docente.getMaterie().contains(materia)) {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
 		Map<Materia, Docente> materieAssegnate = classe.getMaterieAssegnate();
 		if (materieAssegnate.containsKey(materia)) {
-			throw new MateriaHandlingException("Materia già assegnata provvedere a liberarla prima di reassegnarla",classeMapper.classeToDto(classe), materia);
+			throw new MateriaHandlingException("Materia già assegnata provvedere a liberarla prima di riassegnarla",classeMapper.classeToDto(classe), materia);
 		}
 		
 		materieAssegnate.put(materia, docente);
@@ -104,6 +105,6 @@ public class ClasseService {
 	public Classe findById(Long classeId) {
 		
 		return classeRepository.findById(classeId)
-				.orElseThrow(() -> new ClasseNotFoundException(classeId.toString()));
+				.orElseThrow(() -> new ResourceNotFoundException(Resource.CLASSE, classeId));
 	}
 }

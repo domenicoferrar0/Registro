@@ -47,4 +47,8 @@ public class Studente {
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "classe_id", nullable = true)
 	private Classe classe;
+	
+	public String getCf() {
+		return getAnagrafica().getCf();
+	}
 }

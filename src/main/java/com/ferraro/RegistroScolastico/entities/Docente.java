@@ -52,7 +52,7 @@ public class Docente {
 	@ElementCollection(targetClass = Materia.class)
 	@CollectionTable(name = "docente_materie", joinColumns = @JoinColumn(name = "docente_id"))
 	@Column(nullable = false)
-	private Set<Materia> materia;
+	private Set<Materia> materie;
 	
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinTable(name = "docenti_classi",

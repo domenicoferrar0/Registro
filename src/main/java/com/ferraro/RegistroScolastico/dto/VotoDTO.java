@@ -20,6 +20,13 @@ public class VotoDTO {
 	private DocenteDTOSimple docente;
 
 	private Double voto;
-	
+
 	private Materia materia;
+
+	public VotoDTO(StudenteDTOSimple studente, LocalDate data, Double voto, Materia materia) {
+		this.studente = studente;
+		this.data = data;
+		this.voto = voto;
+		this.materia = materia;
+	}
 }

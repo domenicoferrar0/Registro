@@ -1,8 +1,10 @@
 package com.ferraro.RegistroScolastico.exceptions;
 
+import com.ferraro.RegistroScolastico.enums.Resource;
+
 public class ResourceNotFoundException extends RuntimeException{
 	
-	public ResourceNotFoundException(String risorsa) {
-		super("Stai tentando di accedere ad una risorsa che non esiste ".concat(risorsa));
+	public ResourceNotFoundException(Resource risorsa, Long id) {
+		super(String.format("Errore, risorsa non trovata %s con Id: %d", risorsa.getNome(), id));
 	}
 }

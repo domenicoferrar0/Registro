@@ -18,7 +18,7 @@ public class DocenteDTO {
 	
 	private String email;
 	
-	private Set<Materia> materia;
+	private Set<Materia> materie;
 	
 	private Set<ClasseDTO> classi;
 }

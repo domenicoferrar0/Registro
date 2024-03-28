@@ -18,7 +18,6 @@ import com.ferraro.RegistroScolastico.dto.AssenzaDTO;
 import com.ferraro.RegistroScolastico.dto.ClasseDTOFull;
 import com.ferraro.RegistroScolastico.dto.StudenteDTO;
 import com.ferraro.RegistroScolastico.dto.VotoDTO;
-import com.ferraro.RegistroScolastico.dto.VotoMedia;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.enums.Materia;
 import com.ferraro.RegistroScolastico.service.AssenzaService;
@@ -60,7 +59,7 @@ public class StudenteController {
 	}
 	
 	@GetMapping("/voti/media")
-	public ResponseEntity<List<VotoMedia>> studentGetMediaVoti(@NonNull @RequestHeader("Authorization") String authorization){
+	public ResponseEntity<List<VotoDTO>> studentGetMediaVoti(@NonNull @RequestHeader("Authorization") String authorization){
 				
 		Studente studente = studenteService.extractStudente(authorization);
 		return ResponseEntity.ok(studenteService.getMediaVoti(studente));
@@ -68,7 +67,7 @@ public class StudenteController {
 	}
 	
 	@GetMapping("/voti/media/{materia}")
-	public ResponseEntity<VotoMedia> studentGetMediaMateria(@NonNull @RequestHeader("Authorization") String authorization,
+	public ResponseEntity<VotoDTO> studentGetMediaMateria(@NonNull @RequestHeader("Authorization") String authorization,
 			@PathVariable("materia") Materia materia){
 		Studente studente = studenteService.extractStudente(authorization);
 		return ResponseEntity.ok(studenteService.votoMedio(studente, materia));
