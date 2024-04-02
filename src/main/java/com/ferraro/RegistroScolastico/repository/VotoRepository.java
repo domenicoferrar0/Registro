@@ -17,6 +17,6 @@ public interface VotoRepository extends JpaRepository<Voto, Long>{
 	@Query("delete from Voto v where v.id = ?1")
 	int removeById(Long id);
 	//DA CONTROLLARE SE NON CERCA ALTRI STUDENTI
-	@Query("select v from Voto v JOIN v.docente d JOIN v.studente s WHERE s = ?2 AND CAST(d.materia as string) LIKE %?1% OR CAST (v.voto as string) = ?1")
+	@Query("select v from Voto v JOIN v.studente s WHERE s = ?2 AND CAST(v.materia as string) LIKE %?1% OR CAST (v.voto as string) = ?1")
 	Set<Voto> searchByStudente(String searchTerm, Studente studente);
 }

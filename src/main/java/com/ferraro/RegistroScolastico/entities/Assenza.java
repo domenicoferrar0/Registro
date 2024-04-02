@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Range;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -45,5 +46,9 @@ public class Assenza {
 	@Column(nullable = false)
 	@Range(min = 1, max = 6, message = "le ore di assenza variano da 1 a 6")
 	private Integer ore;
+	
+	@Embedded
+	@Column( nullable = false)
+	private Periodo periodo;
 
 }

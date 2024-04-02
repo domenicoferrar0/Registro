@@ -87,6 +87,7 @@ public class AdminController {
 		return ResponseEntity.ok(assenzaService.findAll());
 	}
 	
+	//LO TENGO PER DEBUGGING
 	@GetMapping(value = "/token")
 	public ResponseEntity<List<ConfirmationToken>> getToken() {
 		return ResponseEntity.ok(mailService.allToken());

@@ -3,9 +3,11 @@ package com.ferraro.RegistroScolastico.entities;
 import java.time.LocalDate;
 
 import com.ferraro.RegistroScolastico.enums.Materia;
+import com.ferraro.RegistroScolastico.enums.Quadrimestre;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,6 +22,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,6 +62,14 @@ public class Voto {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Materia materia;
+	
+	@Embedded
+	@NotNull
+	private Periodo periodo;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Quadrimestre quadrimestre;
 	
 	
 }

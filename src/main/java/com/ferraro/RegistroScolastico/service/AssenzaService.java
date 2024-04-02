@@ -66,6 +66,7 @@ public class AssenzaService {
 		}
 		Assenza assenza = assenzaMapper.requestToVoto(request);
 		assenza.setStudente(studente);
+		assenza.setPeriodo(classe.getPeriodo());
 		return assenza;
 	}
 

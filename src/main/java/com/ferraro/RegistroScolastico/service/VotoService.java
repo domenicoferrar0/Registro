@@ -2,6 +2,7 @@ package com.ferraro.RegistroScolastico.service;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -18,10 +19,12 @@ import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.entities.Voto;
+import com.ferraro.RegistroScolastico.enums.Quadrimestre;
 import com.ferraro.RegistroScolastico.enums.Resource;
 import com.ferraro.RegistroScolastico.exceptions.DocenteUnauthorizedException;
 import com.ferraro.RegistroScolastico.exceptions.ResourceNotFoundException;
 import com.ferraro.RegistroScolastico.exceptions.StudenteHasNoClassException;
+import com.ferraro.RegistroScolastico.exceptions.VotoUnmodifiableException;
 import com.ferraro.RegistroScolastico.mapper.DocenteMapper;
 import com.ferraro.RegistroScolastico.mapper.StudenteMapper;
 import com.ferraro.RegistroScolastico.mapper.VotoMapper;
@@ -49,6 +52,13 @@ public class VotoService {
 		return votoMapper.votiToDto(voti);
 	}
 	
+	public void isVotoModifiable(Voto voto, Studente studente) {
+		Quadrimestre currentQuadrimestre = Quadrimestre.determinaQuadrimestre(LocalDate.now().getMonthValue());
+		Classe classe = studente.getClasse();
+		if(!voto.getPeriodo().equals(classe.getPeriodo()) || currentQuadrimestre != voto.getQuadrimestre()) {
+			throw new VotoUnmodifiableException();
+		}
+	}
 	
 	public Voto creaVoto(Docente docente, Studente studente, VotoRequest request) {
 		if (studente.getClasse() == null) {
@@ -63,6 +73,11 @@ public class VotoService {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
 		Voto voto = votoMapper.requestToVoto(request);
+		//Determina l'anno scolastisco prendendo come riferimento quello della classe
+		voto.setPeriodo(studente.getClasse().getPeriodo());
+		int mese = request.getData().getMonthValue();
+		//Determina il quadrimestre usando int del mese della data corrente
+		voto.setQuadrimestre(Quadrimestre.determinaQuadrimestre(mese));
 		voto.setDocente(docente);
 		voto.setStudente(studente);
 		return voto;
@@ -81,6 +96,9 @@ public class VotoService {
 		if (!voto.getDocente().equals(docente)) {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
+		
+		isVotoModifiable(voto, voto.getStudente());
+		
 		votoRepository.delete(voto);
 	}
 
@@ -89,6 +107,7 @@ public class VotoService {
 		if (!voto.getDocente().equals(docente) || !docente.getMaterie().contains(votoRequest.getMateria())) {
 			throw new DocenteUnauthorizedException(docenteMapper.docenteToDtoSimple(docente));
 		}
+		isVotoModifiable(voto, voto.getStudente());		
 		voto.setStudente(studente);
 		voto.setData(votoRequest.getData());
 		voto.setVoto(votoRequest.getVoto());
@@ -105,6 +124,7 @@ public class VotoService {
 			votiTot = votoMapper.votiToDto(votiQuery);
 
 		}
+		//TODO valutare quale conviene di più tra sort della collection e sort di pageable
 		votiTot.sort(Comparator.comparing(VotoDTO::getData).reversed());
 
 		Pageable pageRequest = PageRequest.of(page, size);

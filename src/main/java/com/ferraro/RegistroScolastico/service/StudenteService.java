@@ -19,6 +19,7 @@ import com.ferraro.RegistroScolastico.dto.ClasseDTOFull;
 import com.ferraro.RegistroScolastico.dto.RegistrationForm;
 import com.ferraro.RegistroScolastico.entities.Classe;
 import com.ferraro.RegistroScolastico.entities.Docente;
+import com.ferraro.RegistroScolastico.entities.Periodo;
 import com.ferraro.RegistroScolastico.entities.Studente;
 import com.ferraro.RegistroScolastico.entities.Voto;
 import com.ferraro.RegistroScolastico.enums.Materia;
@@ -72,35 +73,33 @@ public class StudenteService {
 		return findByEmail(email);
 	}
 	
-	public List<VotoDTO> getMediaVoti(Studente studente){
+	public List<VotoDTO> getMediaVoti(Studente studente, int startYear){
 		if (studente.getClasse()== null) {
 			throw new StudenteHasNoClassException(studenteMapper.studenteToDto(studente));
 		}
 		
-		Set<Voto> voti = studente.getVoti();
+		Set<Voto> voti = studenteRepository.findVotiByPeriodo(new Periodo(startYear, startYear+1));
 		if(voti.isEmpty()) {
 			throw new StudenteHasNoVotiException(studenteMapper.studenteToDto(studente));
 		}
 		LocalDate data = LocalDate.now();
 		Map<Materia, Double> mappaVoti = voti.stream().collect(Collectors.groupingBy(Voto::getMateria, Collectors.averagingDouble(Voto::getVoto)));
-		List<VotoDTO> votoMedia = new ArrayList<VotoDTO>();
+		List<VotoDTO> mediaVoti = new ArrayList<VotoDTO>();
 		StudenteDTOSimple studenteDto = studenteMapper.studenteToDtoSimple(studente);
 		for (Map.Entry<Materia, Double> m : mappaVoti.entrySet()) {
 			VotoDTO voto = new VotoDTO(studenteDto, data, m.getValue(), m.getKey());
-			votoMedia.add(voto);
+			mediaVoti.add(voto);
 		}
-		return votoMedia;
+		return mediaVoti;
 	}
 	
-	public VotoDTO votoMedio(Studente studente, Materia materia) {
+	public VotoDTO votoMedio(Studente studente, Materia materia, int startYear) {
 		if (studente.getClasse()== null) {
 			throw new StudenteHasNoClassException(studenteMapper.studenteToDto(studente));
 		}
-		List<Voto> votiMateria = studente.getVoti().stream().filter((d) -> d.getMateria() == materia).collect(Collectors.toList());
-		if(votiMateria.isEmpty()) {
-			throw new StudenteHasNoVotiException(studenteMapper.studenteToDto(studente));
-		}
-		Double votoMedio = votiMateria.stream().collect(Collectors.averagingDouble(Voto::getVoto));
+		Periodo periodo = new Periodo(startYear, startYear+1);
+		Double votoMedio = studenteRepository.votoMedioMateria(materia, periodo, studente.getId())
+				.orElseThrow(() -> new StudenteHasNoVotiException(studenteMapper.studenteToDto(studente), materia));
 		StudenteDTOSimple studenteDto = studenteMapper.studenteToDtoSimple(studente);
 		return new VotoDTO(studenteDto, LocalDate.now(), votoMedio, materia);
 	}
@@ -137,9 +136,9 @@ public class StudenteService {
 	}
 
 	public Studente findByEmail(String email) {
-		Studente studente = studenteRepository.findByUser_Email(email)
+		return studenteRepository.findByUser_Email(email)
 				.orElseThrow(() -> new UsernameNotFoundException(email));
-		return studente;
+		
 	}
 
 	public Studente findById(Long id) {

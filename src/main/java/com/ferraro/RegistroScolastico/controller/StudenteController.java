@@ -59,18 +59,19 @@ public class StudenteController {
 	}
 	
 	@GetMapping("/voti/media")
-	public ResponseEntity<List<VotoDTO>> studentGetMediaVoti(@NonNull @RequestHeader("Authorization") String authorization){
+	public ResponseEntity<List<VotoDTO>> studentGetMediaVoti(@NonNull @RequestHeader("Authorization") String authorization
+			, @RequestParam(value = "startYear", required = true) int startYear){
 				
 		Studente studente = studenteService.extractStudente(authorization);
-		return ResponseEntity.ok(studenteService.getMediaVoti(studente));
+		return ResponseEntity.ok(studenteService.getMediaVoti(studente, startYear));
 		
 	}
 	
 	@GetMapping("/voti/media/{materia}")
 	public ResponseEntity<VotoDTO> studentGetMediaMateria(@NonNull @RequestHeader("Authorization") String authorization,
-			@PathVariable("materia") Materia materia){
+			@PathVariable("materia") Materia materia, @RequestParam(value = "startYear", required = true) int startYear){
 		Studente studente = studenteService.extractStudente(authorization);
-		return ResponseEntity.ok(studenteService.votoMedio(studente, materia));
+		return ResponseEntity.ok(studenteService.votoMedio(studente, materia, startYear));
 	}
 	
 	@GetMapping("/classe")

@@ -70,13 +70,13 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
 	
-	@ExceptionHandler(StudenteHasNoClassException.class)
-	public ResponseEntity<ApiResponse> handleNoClassException(StudenteHasNoClassException ex){
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.forbidden(ex.getMessage(), ex.getObject()));
+	@ExceptionHandler(VotoUnmodifiableException.class)
+	public ResponseEntity<String> votoUnmodifiable(VotoUnmodifiableException ex){
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
 	}
 	
-	@ExceptionHandler(MateriaHandlingException.class)
-	public ResponseEntity<ApiResponse> materiaException(MateriaHandlingException ex){
+	@ExceptionHandler({MateriaHandlingException.class, StudenteHasNoClassException.class})
+	public ResponseEntity<ApiResponse> materiaException(CustomException ex){
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.forbidden(ex.getMessage(), ex.getObject()));
 	}
 	
